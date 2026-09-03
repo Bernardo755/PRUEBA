@@ -3,67 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quetzalcóatl Autónomo</title>
+    <title>Quetzalcóatl en el Contorno</title>
     <style>
         /* =========================================
-           Estilos del Quetzalcóatl
+           Estilos Realistas del Quetzalcóatl
            ========================================= */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden; /* Evita barras de desplazamiento por el movimiento */
+        }
+
+        /* Contenedor central simulando tu página web */
+        .web-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 75vw;
+            height: 75vh;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 40px;
+            box-sizing: border-box;
+            z-index: 1;
+        }
+
+        /* Segmentos de la serpiente */
         .quetzalcoatl-segment {
             position: fixed;
-            pointer-events: none; /* Permite dar clic a los elementos debajo */
-            z-index: 9999; /* Lo mantiene por encima de todo */
+            pointer-events: none; /* No bloquea los clics de la página */
+            z-index: 9999; /* Por encima de todo */
             border-radius: 50%;
             transform: translate(-50%, -50%);
         }
 
+        /* Estilo fotorrealista para la Cabeza */
         .quetzalcoatl-head {
-            width: 45px;
-            height: 45px;
-            background: #006400; /* Verde oscuro */
-            border: 3px solid #FFD700; /* Dorado */
-            box-shadow: 0 0 15px #FF0000; /* Resplandor rojo/fuego */
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, #004d26 0%, #002613 100%);
+            border: 2px solid #d4af37; /* Dorado azteca */
+            box-shadow: 0 0 20px rgba(0, 100, 0, 0.8), inset 0 0 10px #ffd700;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 26px; /* Tamaño del emoji */
+            font-size: 32px;
         }
 
+        /* Estilo fotorrealista para el Cuerpo (Plumas y Escamas) */
         .quetzalcoatl-body {
-            background: #228B22; /* Verde bosque */
-            border: 2px solid #FFD700;
-            /* Efecto de plumas usando sombras */
-            box-shadow: -2px 2px 8px rgba(255, 69, 0, 0.6); 
+            background: radial-gradient(circle, #2e8b57 0%, #006400 70%, #8b0000 100%); /* Verde con destellos rojizos de plumas */
+            border: 1px solid #ffd700;
+            box-shadow: -3px 3px 12px rgba(0, 50, 0, 0.7), 0 0 8px rgba(255, 69, 0, 0.5);
         }
     </style>
 </head>
 <body>
 
-    <h1 style="text-align: center; font-family: sans-serif; margin-top: 20%;">
-        Tu página web principal
-    </h1>
+    <div class="web-content">
+        <h1>Mi Página Web</h1>
+        <p>El Quetzalcóatl está custodiando y recorriendo el contorno de tu pantalla de forma independiente.</p>
+    </div>
 
     <script>
         /* =========================================
-           Lógica de Movimiento del Quetzalcóatl
+           Lógica de Movimiento por el Contorno
            ========================================= */
         
-        // 1. Configuración principal
-        const numSegments = 25; // Largo de la serpiente
+        const numSegments = 35; // Cuerpo más largo para rodear la pantalla
         const segments = [];
-        const history = []; // Historial de posiciones de la cabeza
-        const spacing = 5; // Distancia entre segmentos
-        let speed = 4; // Velocidad de movimiento
+        const history = []; 
+        let progress = 0; // Posición actual a lo largo del perímetro (0 a 1)
+        let speed = 0.0015; // Velocidad de recorrido por el borde
 
-        // 2. Inicialización de los elementos en el DOM
+        // Inicializar elementos en el DOM
         for (let i = 0; i < numSegments; i++) {
             let el = document.createElement('div');
             el.className = 'quetzalcoatl-segment ' + (i === 0 ? 'quetzalcoatl-head' : 'quetzalcoatl-body');
             
-            if (i === 0) el.innerHTML = '🐉'; // Cabeza del Quetzalcóatl
-            
-            // Reducir gradualmente el tamaño del cuerpo para simular la cola
-            if (i > 0) {
-                let size = Math.max(10, 35 - (i * 1.2));
+            if (i === 0) {
+                el.innerHTML = '🐉'; // Puedes cambiarlo si prefieres otro icono o imagen
+            } else {
+                // Hacer el cuerpo más delgado hacia la cola
+                let size = Math.max(12, 45 - (i * 0.9));
                 el.style.width = size + 'px';
                 el.style.height = size + 'px';
             }
@@ -72,72 +98,91 @@
             segments.push({ el: el, x: 0, y: 0 });
         }
 
-        // 3. Variables de posición y objetivo
-        let headX = window.innerWidth / 2;
-        let headY = window.innerHeight / 2;
-        let targetX = Math.random() * window.innerWidth;
-        let targetY = Math.random() * window.innerHeight;
+        // Función matemática para calcular coordenadas exactas en el perímetro de la ventana
+        function getPerimeterPoint(p) {
+            let w = window.innerWidth;
+            let h = window.innerHeight;
+            let margin = 50; // Margen exterior para que pase por los bordes exactos
+            
+            let perimeter = 2 * ((w - margin * 2) + (h - margin * 2));
+            let currentDist = p * perimeter;
 
-        // 4. Ciclo de Animación
-        function animate() {
-            // Calcular dirección hacia el objetivo aleatorio
-            let dx = targetX - headX;
-            let dy = targetY - headY;
-            let dist = Math.sqrt(dx * dx + dy * dy);
+            let x = margin, y = margin;
+            let topLen = w - margin * 2;
+            let rightLen = h - margin * 2;
+            let bottomLen = w - margin * 2;
 
-            // Si llega cerca del objetivo, elige uno nuevo
-            if (dist < 50) {
-                targetX = Math.random() * (window.innerWidth - 100) + 50;
-                targetY = Math.random() * (window.innerHeight - 100) + 50;
+            if (currentDist <= topLen) {
+                // Lado Superior (De izquierda a derecha)
+                x = margin + currentDist;
+                y = margin;
+            } else if (currentDist <= topLen + rightLen) {
+                // Lado Derecho (De arriba hacia abajo)
+                x = w - margin;
+                y = margin + (currentDist - topLen);
+            } else if (currentDist <= topLen + rightLen + bottomLen) {
+                // Lado Inferior (De derecha a izquierda)
+                x = (w - margin) - (currentDist - topLen - rightLen);
+                y = h - margin;
+            } else {
+                // Lado Izquierdo (De abajo hacia arriba)
+                x = margin;
+                y = (h - margin) - (currentDist - topLen - rightLen - bottomLen);
             }
 
-            // Calcular velocidad en X y Y
-            let vx = (dx / dist) * speed;
-            let vy = (dy / dist) * speed;
+            return { x, y };
+        }
 
-            // Añadir un movimiento ondulatorio (senoide) para simular una serpiente
-            let time = Date.now() * 0.005;
-            let wiggleX = Math.cos(time) * 1.5;
-            let wiggleY = Math.sin(time) * 1.5;
+        // Ciclo de animación continuo
+        function animate() {
+            // Avanzar el progreso en el perímetro
+            progress += speed;
+            if (progress > 1) progress = 0; // Reinicia el circuito al llegar al inicio
 
-            headX += vx + wiggleX;
-            headY += vy + wiggleY;
+            // Calcular posición de la cabeza basada en el contorno
+            let headPos = getPerimeterPoint(progress);
+            let headX = headPos.x;
+            let headY = headPos.y;
 
-            // Guardar la posición actual en el historial
+            // Añadir un leve toque ondulatorio natural al avanzar por el borde
+            let time = Date.now() * 0.008;
+            headX += Math.cos(time) * 4;
+            headY += Math.sin(time) * 4;
+
+            // Guardar historial para el efecto de arrastre del cuerpo
             history.unshift({ x: headX, y: headY });
             
-            // Limpiar memoria: no guardar más posiciones de las necesarias
-            if (history.length > numSegments * spacing + 1) {
+            // Mantener el tamaño del historial adecuado al número de segmentos
+            let maxHistory = numSegments * 4;
+            if (history.length > maxHistory) {
                 history.pop();
             }
 
-            // Actualizar posición de la cabeza en pantalla
-            segments[0].x = headX;
-            segments[0].y = headY;
+            // Actualizar la cabeza
             segments[0].el.style.left = headX + 'px';
             segments[0].el.style.top = headY + 'px';
-            
-            // Rotar la cabeza en la dirección del movimiento
-            let angle = Math.atan2(vy, vx) * 180 / Math.PI;
-            // Ajustamos el ángulo dependiendo del emoji (el dragón mira hacia la izquierda por defecto)
-            segments[0].el.style.transform = `translate(-50%, -50%) rotate(${angle + 180}deg) scaleY(-1)`;
 
-            // Actualizar posiciones del cuerpo siguiendo el historial de la cabeza
+            // Calcular rotación suave comparando con la posición anterior
+            if (history.length > 1) {
+                let dx = headX - history[1].x;
+                let dy = headY - history[1].y;
+                let angle = Math.atan2(dy, dx) * 180 / Math.PI;
+                segments[0].el.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
+            }
+
+            // Actualizar el cuerpo siguiendo el historial
             for (let i = 1; i < numSegments; i++) {
-                let histIndex = i * spacing;
+                let histIndex = i * 4; // Espaciado entre segmentos del cuerpo
                 if (history[histIndex]) {
-                    segments[i].x = history[histIndex].x;
-                    segments[i].y = history[histIndex].y;
-                    segments[i].el.style.left = segments[i].x + 'px';
-                    segments[i].el.style.top = segments[i].y + 'px';
+                    segments[i].el.style.left = history[histIndex].x + 'px';
+                    segments[i].el.style.top = history[histIndex].y + 'px';
                 }
             }
 
-            // Repetir el ciclo
             requestAnimationFrame(animate);
         }
 
-        // Iniciar animación
+        // Iniciar bucle de animación
         animate();
     </script>
 </body>
