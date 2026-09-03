@@ -7,6 +7,36 @@
     <!-- Librería SheetJS para leer y crear archivos Excel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
+/* =========================================
+           Estilos del Quetzalcóatl
+           ========================================= */
+        .quetzalcoatl-segment {
+            position: fixed;
+            pointer-events: none; /* Permite dar clic a los elementos debajo */
+            z-index: 9999; /* Lo mantiene por encima de todo */
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .quetzalcoatl-head {
+            width: 45px;
+            height: 45px;
+            background: #006400; /* Verde oscuro */
+            border: 3px solid #FFD700; /* Dorado */
+            box-shadow: 0 0 15px #FF0000; /* Resplandor rojo/fuego */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px; /* Tamaño del emoji */
+        }
+
+        .quetzalcoatl-body {
+            background: #228B22; /* Verde bosque */
+            border: 2px solid #FFD700;
+            /* Efecto de plumas usando sombras */
+            box-shadow: -2px 2px 8px rgba(255, 69, 0, 0.6); 
+        }
+ 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f0f2f5;
@@ -742,6 +772,106 @@ function procesarManual() {
             window.open(url, "_self");
         }
     }
+
+
+/* =========================================
+           Lógica de Movimiento del Quetzalcóatl
+           ========================================= */
+        
+        // 1. Configuración principal
+        const numSegments = 25; // Largo de la serpiente
+        const segments = [];
+        const history = []; // Historial de posiciones de la cabeza
+        const spacing = 5; // Distancia entre segmentos
+        let speed = 4; // Velocidad de movimiento
+
+        // 2. Inicialización de los elementos en el DOM
+        for (let i = 0; i < numSegments; i++) {
+            let el = document.createElement('div');
+            el.className = 'quetzalcoatl-segment ' + (i === 0 ? 'quetzalcoatl-head' : 'quetzalcoatl-body');
+            
+            if (i === 0) el.innerHTML = '🐉'; // Cabeza del Quetzalcóatl
+            
+            // Reducir gradualmente el tamaño del cuerpo para simular la cola
+            if (i > 0) {
+                let size = Math.max(10, 35 - (i * 1.2));
+                el.style.width = size + 'px';
+                el.style.height = size + 'px';
+            }
+            
+            document.body.appendChild(el);
+            segments.push({ el: el, x: 0, y: 0 });
+        }
+
+        // 3. Variables de posición y objetivo
+        let headX = window.innerWidth / 2;
+        let headY = window.innerHeight / 2;
+        let targetX = Math.random() * window.innerWidth;
+        let targetY = Math.random() * window.innerHeight;
+
+        // 4. Ciclo de Animación
+        function animate() {
+            // Calcular dirección hacia el objetivo aleatorio
+            let dx = targetX - headX;
+            let dy = targetY - headY;
+            let dist = Math.sqrt(dx * dx + dy * dy);
+
+            // Si llega cerca del objetivo, elige uno nuevo
+            if (dist < 50) {
+                targetX = Math.random() * (window.innerWidth - 100) + 50;
+                targetY = Math.random() * (window.innerHeight - 100) + 50;
+            }
+
+            // Calcular velocidad en X y Y
+            let vx = (dx / dist) * speed;
+            let vy = (dy / dist) * speed;
+
+            // Añadir un movimiento ondulatorio (senoide) para simular una serpiente
+            let time = Date.now() * 0.005;
+            let wiggleX = Math.cos(time) * 1.5;
+            let wiggleY = Math.sin(time) * 1.5;
+
+            headX += vx + wiggleX;
+            headY += vy + wiggleY;
+
+            // Guardar la posición actual en el historial
+            history.unshift({ x: headX, y: headY });
+            
+            // Limpiar memoria: no guardar más posiciones de las necesarias
+            if (history.length > numSegments * spacing + 1) {
+                history.pop();
+            }
+
+            // Actualizar posición de la cabeza en pantalla
+            segments[0].x = headX;
+            segments[0].y = headY;
+            segments[0].el.style.left = headX + 'px';
+            segments[0].el.style.top = headY + 'px';
+            
+            // Rotar la cabeza en la dirección del movimiento
+            let angle = Math.atan2(vy, vx) * 180 / Math.PI;
+            // Ajustamos el ángulo dependiendo del emoji (el dragón mira hacia la izquierda por defecto)
+            segments[0].el.style.transform = `translate(-50%, -50%) rotate(${angle + 180}deg) scaleY(-1)`;
+
+            // Actualizar posiciones del cuerpo siguiendo el historial de la cabeza
+            for (let i = 1; i < numSegments; i++) {
+                let histIndex = i * spacing;
+                if (history[histIndex]) {
+                    segments[i].x = history[histIndex].x;
+                    segments[i].y = history[histIndex].y;
+                    segments[i].el.style.left = segments[i].x + 'px';
+                    segments[i].el.style.top = segments[i].y + 'px';
+                }
+            }
+
+            // Repetir el ciclo
+            requestAnimationFrame(animate);
+        }
+
+        // Iniciar animación
+        animate();
+
+        
 </script>
 
 
