@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quetzalcóatl Realista Avanzado</title>
+    <title>Quetzalcóatl Plumaje Completo</title>
     <style>
         body {
             margin: 0;
@@ -42,8 +42,8 @@
 <body>
 
     <div class="web-content">
-        <h1>Quetzalcóatl Orgánico</h1>
-        <p>Esta versión utiliza un renderizado avanzado de plumas en capas, textura escamada y ojos con destellos de brillo divino que recorren de forma fluida el contorno.</p>
+        <h1>Quetzalcóatl: Cuerpo Emplumado Realista</h1>
+        <p>Todo el cuerpo cuenta con un diseño detallado de plumas verdes esmeralda y destellos rojos, con una velocidad de desplazamiento más pausada y solemne.</p>
     </div>
 
     <canvas id="quetzalCanvas"></canvas>
@@ -59,10 +59,10 @@
         window.addEventListener('resize', resize);
         resize();
 
-        const numPoints = 80;
+        const numPoints = 85;
         const points = [];
         let progress = 0;
-        let speed = 0.0009;
+        let speed = 0.00045; // Velocidad reducida para un movimiento más lento y majestuoso
 
         for (let i = 0; i < numPoints; i++) {
             points.push({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
@@ -108,7 +108,7 @@
             points[0].x = target.x;
             points[0].y = target.y;
 
-            let time = Date.now() * 0.005;
+            let time = Date.now() * 0.003; // Ondulación más suave y lenta
 
             for (let i = 1; i < numPoints; i++) {
                 let prev = points[i - 1];
@@ -118,43 +118,51 @@
                 let dy = prev.y - curr.y;
                 let angle = Math.atan2(dy, dx);
                 let dist = Math.hypot(dx, dy);
-                let targetSpacing = 9;
+                let targetSpacing = 10;
 
                 if (dist > targetSpacing) {
                     curr.x = prev.x - Math.cos(angle) * targetSpacing;
                     curr.y = prev.y - Math.sin(angle) * targetSpacing;
                 }
 
-                let wave = Math.sin(time - i * 0.1) * (4.5 * (1 - i / numPoints));
+                let wave = Math.sin(time - i * 0.08) * (5 * (1 - i / numPoints));
                 curr.x += -Math.sin(angle) * wave;
                 curr.y += Math.cos(angle) * wave;
             }
 
-            // Dibujar cuerpo segmentado imitando plumas y escamas superpuestas
+            // Dibujar todo el cuerpo con plumas estilizadas (abanicos laterales a lo largo de cada segmento)
             for (let i = points.length - 1; i > 0; i--) {
                 let p = points[i];
                 let ratio = 1 - (i / numPoints);
-                let size = Math.max(4, 28 * ratio);
+                let size = Math.max(6, 32 * ratio);
+
+                let nextP = points[i - 1] || p;
+                let ang = Math.atan2(nextP.y - p.y, nextP.x - p.x);
 
                 ctx.save();
                 ctx.translate(p.x, p.y);
-                
-                let nextP = points[i - 1] || p;
-                let ang = Math.atan2(nextP.y - p.y, nextP.x - p.x);
                 ctx.rotate(ang);
 
-                // Base de escama/pluma con tono tornasolado variable
+                // --- Plumas laterales (efecto de plumaje completo en todo el cuerpo) ---
+                ctx.fillStyle = '#cc2200'; // Puntas de pluma rojas características
                 ctx.beginPath();
-                ctx.fillStyle = i % 2 === 0 ? '#004d26' : '#1b4d3e';
-                if (i < 20) ctx.fillStyle = '#cc2200'; // Zona de penacho inicial en el lomo
-                
-                ctx.ellipse(0, 0, size, size * 0.7, 0, 0, Math.PI * 2);
+                ctx.moveTo(0, 0);
+                ctx.lineTo(-size * 0.8, -size * 1.2);
+                ctx.lineTo(-size * 0.3, 0);
+                ctx.lineTo(-size * 0.8, size * 1.2);
+                ctx.closePath();
                 ctx.fill();
 
-                // Brillo central simulando textura tridimensional de pluma de quetzal
+                // Base de pluma principal en verde esmeralda brillante de quetzal
+                ctx.fillStyle = i % 2 === 0 ? '#00b050' : '#007a33';
                 ctx.beginPath();
-                ctx.fillStyle = '#00ff88';
-                ctx.ellipse(0, 0, size * 0.6, size * 0.3, 0, 0, Math.PI * 2);
+                ctx.ellipse(0, 0, size, size * 0.65, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Detalle central dorado en cada pluma del cuerpo
+                ctx.fillStyle = '#ffd700';
+                ctx.beginPath();
+                ctx.ellipse(0, 0, size * 0.4, size * 0.25, 0, 0, Math.PI * 2);
                 ctx.fill();
 
                 ctx.restore();
@@ -173,11 +181,11 @@
             ctx.fillStyle = '#e60000';
             ctx.beginPath();
             ctx.moveTo(-5, 0);
-            ctx.lineTo(-45, -20);
+            ctx.lineTo(-45, -22);
             ctx.lineTo(-25, -5);
-            ctx.lineTo(-50, 0);
+            ctx.lineTo(-55, 0);
             ctx.lineTo(-25, 5);
-            ctx.lineTo(-45, 20);
+            ctx.lineTo(-45, 22);
             ctx.closePath();
             ctx.fill();
 
@@ -185,9 +193,9 @@
             ctx.fillStyle = '#ffd700';
             ctx.beginPath();
             ctx.moveTo(-10, 0);
-            ctx.lineTo(-30, -10);
+            ctx.lineTo(-32, -12);
             ctx.lineTo(-15, 0);
-            ctx.lineTo(-30, 10);
+            ctx.lineTo(-32, 12);
             ctx.closePath();
             ctx.fill();
 
@@ -197,12 +205,12 @@
             ctx.lineWidth = 2;
 
             ctx.beginPath();
-            ctx.moveTo(30, 0);
-            ctx.lineTo(12, -14);
-            ctx.lineTo(-15, -12);
-            ctx.lineTo(-22, 0);
-            ctx.lineTo(-15, 12);
-            ctx.lineTo(12, 14);
+            ctx.moveTo(32, 0);
+            ctx.lineTo(14, -15);
+            ctx.lineTo(-15, -13);
+            ctx.lineTo(-24, 0);
+            ctx.lineTo(-15, 13);
+            ctx.lineTo(14, 15);
             ctx.closePath();
             ctx.fill();
             ctx.stroke();
@@ -210,22 +218,22 @@
             // Cresta superior dorada
             ctx.fillStyle = '#ffaa00';
             ctx.beginPath();
-            ctx.moveTo(18, -8);
-            ctx.lineTo(5, -15);
-            ctx.lineTo(-2, -10);
+            ctx.moveTo(18, -9);
+            ctx.lineTo(6, -16);
+            ctx.lineTo(-2, -11);
             ctx.fill();
 
             // Ojos ardientes con brillo estelar
             ctx.fillStyle = '#ff3300';
             ctx.beginPath();
-            ctx.arc(10, -5, 4, 0, Math.PI * 2);
-            ctx.arc(10, 5, 4, 0, Math.PI * 2);
+            ctx.arc(11, -5, 4, 0, Math.PI * 2);
+            ctx.arc(11, 5, 4, 0, Math.PI * 2);
             ctx.fill();
 
             ctx.fillStyle = '#ffffff';
             ctx.beginPath();
-            ctx.arc(11, -5, 1.5, 0, Math.PI * 2);
-            ctx.arc(11, 5, 1.5, 0, Math.PI * 2);
+            ctx.arc(12, -5, 1.5, 0, Math.PI * 2);
+            ctx.arc(12, 5, 1.5, 0, Math.PI * 2);
             ctx.fill();
 
             ctx.restore();
