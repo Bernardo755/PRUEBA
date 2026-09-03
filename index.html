@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quetzalcóatl Realista - Canvas</title>
+    <title>Quetzalcóatl Divino - Fotorrealista</title>
     <style>
         body {
             margin: 0;
             padding: 0;
-            background-color: #0f111a;
+            background-color: #050811;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             overflow: hidden;
         }
@@ -22,13 +22,12 @@
             height: 75vh;
             background: #ffffff;
             border-radius: 12px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
             padding: 40px;
             box-sizing: border-box;
             z-index: 1;
         }
 
-        /* El lienzo ocupa toda la pantalla pero permite clics a través de él */
         #quetzalCanvas {
             position: fixed;
             top: 0;
@@ -43,8 +42,8 @@
 <body>
 
     <div class="web-content">
-        <h1>Quetzalcóatl en Canvas</h1>
-        <p>Esta versión utiliza un motor gráfico en tiempo real para lograr un cuerpo continuo, flexible y con texturas de plumas fluidas.</p>
+        <h1>Quetzalcóatl: La Serpiente Emplumada</h1>
+        <p>Esta versión rediseña por completo la cabeza con un penacho ceremonial, mandíbula de serpiente mítica y un cuerpo texturizado con plumas de esmeralda y fuego.</p>
     </div>
 
     <canvas id="quetzalCanvas"></canvas>
@@ -53,7 +52,6 @@
         const canvas = document.getElementById('quetzalCanvas');
         const ctx = canvas.getContext('2d');
 
-        // Ajustar resolución del canvas a pantallas Retina/HD
         function resize() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
@@ -61,18 +59,15 @@
         window.addEventListener('resize', resize);
         resize();
 
-        // Configuración de la serpiente
-        const numPoints = 60; // Mayor cantidad de puntos para una curva ultra suave
+        const numPoints = 70;
         const points = [];
         let progress = 0;
-        let speed = 0.0012;
+        let speed = 0.001;
 
-        // Inicializar puntos en el centro
         for (let i = 0; i < numPoints; i++) {
             points.push({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
         }
 
-        // Función matemática del perímetro de la pantalla
         function getPerimeterPoint(p) {
             let w = window.innerWidth;
             let h = window.innerHeight;
@@ -104,98 +99,135 @@
         }
 
         function animate() {
-            // Limpiar canvas en cada fotograma
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Avanzar recorrido
             progress += speed;
             if (progress > 1) progress = 0;
 
             let target = getPerimeterPoint(progress);
-
-            // Simulación física de arrastre (Inverse Kinematics / Follow-the-leader suave)
             points[0].x = target.x;
             points[0].y = target.y;
 
-            // Añadir ondulación sinusoidal orgánica a lo largo del cuerpo
-            let time = Date.now() * 0.005;
+            let time = Date.now() * 0.006;
 
             for (let i = 1; i < numPoints; i++) {
                 let prev = points[i - 1];
                 let curr = points[i];
 
-                // Inercia de seguimiento
                 let dx = prev.x - curr.x;
                 let dy = prev.y - curr.y;
                 let angle = Math.atan2(dy, dx);
-                
                 let dist = Math.hypot(dx, dy);
-                let targetSpacing = 12; // Distancia fija entre segmentos corporales
+                let targetSpacing = 10;
 
                 if (dist > targetSpacing) {
                     curr.x = prev.x - Math.cos(angle) * targetSpacing;
                     curr.y = prev.y - Math.sin(angle) * targetSpacing;
                 }
 
-                // Ondulación lateral simulando el nado de una serpiente
-                let wave = Math.sin(time - i * 0.15) * (3 * (1 - i / numPoints));
+                let wave = Math.sin(time - i * 0.12) * (4 * (1 - i / numPoints));
                 curr.x += -Math.sin(angle) * wave;
                 curr.y += Math.cos(angle) * wave;
             }
 
-            // Dibujar el cuerpo del Quetzalcóatl como una cinta continua con grosor variable
+            // 1. Dibujar el cuerpo emplumado (Múltiples capas para dar textura rica de plumas y escamas)
+            ctx.save();
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            // Sombra exterior / Aura mítica dorada-rojiza
             ctx.beginPath();
             for (let i = 0; i < points.length; i++) {
                 let p = points[i];
-                if (i === 0) {
-                    ctx.moveTo(p.x, p.y);
-                } else {
-                    ctx.lineTo(p.x, p.y);
-                }
+                if (i === 0) ctx.moveTo(p.x, p.y);
+                else ctx.lineTo(p.x, p.y);
             }
+            let bodyGrad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            bodyGrad.addColorStop(0, '#004d26');   // Verde esmeralda oscuro
+            bodyGrad.addColorStop(0.4, '#00b050'); // Verde brillante de quetzal
+            bodyGrad.addColorStop(0.7, '#d4af37'); // Dorado ceremonial
+            bodyGrad.addColorStop(1, '#cc2200');   // Rojo penacho
 
-            // Estilo del trazo: Gradiente tornasolado (Verde esmeralda -> Dorado -> Penachos rojos)
-            let gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-            gradient.addColorStop(0, '#004d26');
-            gradient.addColorStop(0.3, '#2e8b57');
-            gradient.addColorStop(0.7, '#d4af37');
-            gradient.addColorStop(1, '#8b0000');
-
-            ctx.strokeStyle = gradient;
-            ctx.lineWidth = 32; // Grosor máximo en la cabeza
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-            
-            // Sombra realista estilo brillo divino / aura
-            ctx.shadowColor = 'rgba(212, 175, 55, 0.6)';
-            ctx.shadowBlur = 15;
+            ctx.strokeStyle = bodyGrad;
+            ctx.lineWidth = 26;
+            ctx.shadowColor = 'rgba(212, 175, 55, 0.7)';
+            ctx.shadowBlur = 20;
             ctx.stroke();
 
-            // Dibujar la cabeza detallada en la punta (índice 0)
+            // Capa interna de textura (patrón de escamas/plumas simuladas con trazo secundario)
+            ctx.strokeStyle = '#00ff88';
+            ctx.lineWidth = 12;
+            ctx.shadowBlur = 5;
+            ctx.stroke();
+            ctx.restore();
+
+            // 2. Dibujar la Cabeza de Quetzalcóatl Detallada
             let head = points[0];
-            let nextPoint = points[1];
+            let nextPoint = points[2]; // Usar un punto más atrás para calcular el ángulo con estabilidad
             let headAngle = Math.atan2(head.y - nextPoint.y, head.x - nextPoint.x);
 
             ctx.save();
             ctx.translate(head.x, head.y);
             ctx.rotate(headAngle);
 
-            // Cabeza estilizada con Canvas (puedes reemplazar esto por una imagen `drawImage` si lo prefieres)
-            ctx.fillStyle = '#002613';
-            ctx.strokeStyle = '#ffd700';
-            ctx.lineWidth = 3;
-            
+            // --- Penacho de Plumas Sagradas (Detrás de la cabeza) ---
+            ctx.fillStyle = '#ff2200'; // Rojo vibrante de plumas
             ctx.beginPath();
-            ctx.ellipse(0, 0, 22, 14, 0, 0, Math.PI * 2);
+            ctx.moveTo(-10, -5);
+            ctx.lineTo(-35, -25);
+            ctx.lineTo(-20, -5);
+            ctx.lineTo(-40, 0);
+            ctx.lineTo(-20, 5);
+            ctx.lineTo(-35, 25);
+            ctx.lineTo(-10, 5);
+            ctx.fill();
+
+            // Plumas doradas secundarias en el penacho
+            ctx.fillStyle = '#ffd700';
+            ctx.beginPath();
+            ctx.moveTo(-15, -2);
+            ctx.lineTo(-28, -12);
+            ctx.lineTo(-15, 0);
+            ctx.lineTo(-28, 12);
+            ctx.lineTo(-15, 2);
+            ctx.fill();
+
+            // --- Hocico y Mandíbula de la Serpiente ---
+            ctx.fillStyle = '#003311'; // Verde profundo escamoso
+            ctx.strokeStyle = '#ffd700'; // Ribete dorado azteca
+            ctx.lineWidth = 2.5;
+
+            ctx.beginPath();
+            // Forma de cabeza de serpiente estilizada (alargada y altiva)
+            ctx.moveTo(25, 0); // Hocico
+            ctx.lineTo(10, -12); // Arriba de la cabeza
+            ctx.lineTo(-15, -10);
+            ctx.lineTo(-20, 0); // Base del cuello
+            ctx.lineTo(-15, 10);
+            ctx.lineTo(10, 12);
+            ctx.closePath();
             ctx.fill();
             ctx.stroke();
 
-            // Ojos brillantes
-            ctx.fillStyle = '#ff4500';
+            // --- Detalles Faciales (Ojos místico-dorados y marcas ceremoniales) ---
+            // Ojo brillante con pupila felina/reptiliana
+            ctx.fillStyle = '#ffcc00';
             ctx.beginPath();
-            ctx.arc(8, -5, 3, 0, Math.PI * 2);
-            ctx.arc(8, 5, 3, 0, Math.PI * 2);
+            ctx.ellipse(8, -4, 4, 2.5, Math.PI / 6, 0, Math.PI * 2);
             ctx.fill();
+
+            ctx.fillStyle = '#000000';
+            ctx.beginPath();
+            ctx.ellipse(8, -4, 1.5, 2.5, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Cresta o detalle dorado superior en el hocico
+            ctx.strokeStyle = '#ff4500';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(15, -6);
+            ctx.lineTo(5, -9);
+            ctx.stroke();
 
             ctx.restore();
 
