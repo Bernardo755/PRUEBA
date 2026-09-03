@@ -3,20 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quetzalcóatl en el Contorno</title>
+    <title>Quetzalcóatl Realista - Canvas</title>
     <style>
-        /* =========================================
-           Estilos Realistas del Quetzalcóatl
-           ========================================= */
         body {
             margin: 0;
             padding: 0;
-            background-color: #f4f4f4;
+            background-color: #0f111a;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow: hidden; /* Evita barras de desplazamiento por el movimiento */
+            overflow: hidden;
         }
 
-        /* Contenedor central simulando tu página web */
         .web-content {
             position: absolute;
             top: 50%;
@@ -24,85 +20,63 @@
             transform: translate(-50%, -50%);
             width: 75vw;
             height: 75vh;
-            background: white;
+            background: #ffffff;
             border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
             padding: 40px;
             box-sizing: border-box;
             z-index: 1;
         }
 
-        /* Segmentos de la serpiente */
-        .quetzalcoatl-segment {
+        /* El lienzo ocupa toda la pantalla pero permite clics a través de él */
+        #quetzalCanvas {
             position: fixed;
-            pointer-events: none; /* No bloquea los clics de la página */
-            z-index: 9999; /* Por encima de todo */
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-        }
-
-        /* Estilo fotorrealista para la Cabeza */
-        .quetzalcoatl-head {
-            width: 60px;
-            height: 60px;
-            background: radial-gradient(circle, #004d26 0%, #002613 100%);
-            border: 2px solid #d4af37; /* Dorado azteca */
-            box-shadow: 0 0 20px rgba(0, 100, 0, 0.8), inset 0 0 10px #ffd700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-        }
-
-        /* Estilo fotorrealista para el Cuerpo (Plumas y Escamas) */
-        .quetzalcoatl-body {
-            background: radial-gradient(circle, #2e8b57 0%, #006400 70%, #8b0000 100%); /* Verde con destellos rojizos de plumas */
-            border: 1px solid #ffd700;
-            box-shadow: -3px 3px 12px rgba(0, 50, 0, 0.7), 0 0 8px rgba(255, 69, 0, 0.5);
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 9999;
         }
     </style>
 </head>
 <body>
 
     <div class="web-content">
-        <h1>Mi Página Web</h1>
-        <p>El Quetzalcóatl está custodiando y recorriendo el contorno de tu pantalla de forma independiente.</p>
+        <h1>Quetzalcóatl en Canvas</h1>
+        <p>Esta versión utiliza un motor gráfico en tiempo real para lograr un cuerpo continuo, flexible y con texturas de plumas fluidas.</p>
     </div>
 
-    <script>
-        /* =========================================
-           Lógica de Movimiento por el Contorno
-           ========================================= */
-        
-        const numSegments = 35; // Cuerpo más largo para rodear la pantalla
-        const segments = [];
-        const history = []; 
-        let progress = 0; // Posición actual a lo largo del perímetro (0 a 1)
-        let speed = 0.0015; // Velocidad de recorrido por el borde
+    <canvas id="quetzalCanvas"></canvas>
 
-        // Inicializar elementos en el DOM
-        for (let i = 0; i < numSegments; i++) {
-            let el = document.createElement('div');
-            el.className = 'quetzalcoatl-segment ' + (i === 0 ? 'quetzalcoatl-head' : 'quetzalcoatl-body');
-            
-            if (i === 0) {
-                el.innerHTML = '🐉'; // Puedes cambiarlo si prefieres otro icono o imagen
-            } else {
-                // Hacer el cuerpo más delgado hacia la cola
-                let size = Math.max(12, 45 - (i * 0.9));
-                el.style.width = size + 'px';
-                el.style.height = size + 'px';
-            }
-            
-            document.body.appendChild(el);
-            segments.push({ el: el, x: 0, y: 0 });
+    <script>
+        const canvas = document.getElementById('quetzalCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Ajustar resolución del canvas a pantallas Retina/HD
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Configuración de la serpiente
+        const numPoints = 60; // Mayor cantidad de puntos para una curva ultra suave
+        const points = [];
+        let progress = 0;
+        let speed = 0.0012;
+
+        // Inicializar puntos en el centro
+        for (let i = 0; i < numPoints; i++) {
+            points.push({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
         }
 
-        // Función matemática para calcular coordenadas exactas en el perímetro de la ventana
+        // Función matemática del perímetro de la pantalla
         function getPerimeterPoint(p) {
             let w = window.innerWidth;
             let h = window.innerHeight;
-            let margin = 50; // Margen exterior para que pase por los bordes exactos
+            let margin = 40;
             
             let perimeter = 2 * ((w - margin * 2) + (h - margin * 2));
             let currentDist = p * perimeter;
@@ -113,19 +87,15 @@
             let bottomLen = w - margin * 2;
 
             if (currentDist <= topLen) {
-                // Lado Superior (De izquierda a derecha)
                 x = margin + currentDist;
                 y = margin;
             } else if (currentDist <= topLen + rightLen) {
-                // Lado Derecho (De arriba hacia abajo)
                 x = w - margin;
                 y = margin + (currentDist - topLen);
             } else if (currentDist <= topLen + rightLen + bottomLen) {
-                // Lado Inferior (De derecha a izquierda)
                 x = (w - margin) - (currentDist - topLen - rightLen);
                 y = h - margin;
             } else {
-                // Lado Izquierdo (De abajo hacia arriba)
                 x = margin;
                 y = (h - margin) - (currentDist - topLen - rightLen - bottomLen);
             }
@@ -133,56 +103,105 @@
             return { x, y };
         }
 
-        // Ciclo de animación continuo
         function animate() {
-            // Avanzar el progreso en el perímetro
+            // Limpiar canvas en cada fotograma
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Avanzar recorrido
             progress += speed;
-            if (progress > 1) progress = 0; // Reinicia el circuito al llegar al inicio
+            if (progress > 1) progress = 0;
 
-            // Calcular posición de la cabeza basada en el contorno
-            let headPos = getPerimeterPoint(progress);
-            let headX = headPos.x;
-            let headY = headPos.y;
+            let target = getPerimeterPoint(progress);
 
-            // Añadir un leve toque ondulatorio natural al avanzar por el borde
-            let time = Date.now() * 0.008;
-            headX += Math.cos(time) * 4;
-            headY += Math.sin(time) * 4;
+            // Simulación física de arrastre (Inverse Kinematics / Follow-the-leader suave)
+            points[0].x = target.x;
+            points[0].y = target.y;
 
-            // Guardar historial para el efecto de arrastre del cuerpo
-            history.unshift({ x: headX, y: headY });
-            
-            // Mantener el tamaño del historial adecuado al número de segmentos
-            let maxHistory = numSegments * 4;
-            if (history.length > maxHistory) {
-                history.pop();
+            // Añadir ondulación sinusoidal orgánica a lo largo del cuerpo
+            let time = Date.now() * 0.005;
+
+            for (let i = 1; i < numPoints; i++) {
+                let prev = points[i - 1];
+                let curr = points[i];
+
+                // Inercia de seguimiento
+                let dx = prev.x - curr.x;
+                let dy = prev.y - curr.y;
+                let angle = Math.atan2(dy, dx);
+                
+                let dist = Math.hypot(dx, dy);
+                let targetSpacing = 12; // Distancia fija entre segmentos corporales
+
+                if (dist > targetSpacing) {
+                    curr.x = prev.x - Math.cos(angle) * targetSpacing;
+                    curr.y = prev.y - Math.sin(angle) * targetSpacing;
+                }
+
+                // Ondulación lateral simulando el nado de una serpiente
+                let wave = Math.sin(time - i * 0.15) * (3 * (1 - i / numPoints));
+                curr.x += -Math.sin(angle) * wave;
+                curr.y += Math.cos(angle) * wave;
             }
 
-            // Actualizar la cabeza
-            segments[0].el.style.left = headX + 'px';
-            segments[0].el.style.top = headY + 'px';
-
-            // Calcular rotación suave comparando con la posición anterior
-            if (history.length > 1) {
-                let dx = headX - history[1].x;
-                let dy = headY - history[1].y;
-                let angle = Math.atan2(dy, dx) * 180 / Math.PI;
-                segments[0].el.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
-            }
-
-            // Actualizar el cuerpo siguiendo el historial
-            for (let i = 1; i < numSegments; i++) {
-                let histIndex = i * 4; // Espaciado entre segmentos del cuerpo
-                if (history[histIndex]) {
-                    segments[i].el.style.left = history[histIndex].x + 'px';
-                    segments[i].el.style.top = history[histIndex].y + 'px';
+            // Dibujar el cuerpo del Quetzalcóatl como una cinta continua con grosor variable
+            ctx.beginPath();
+            for (let i = 0; i < points.length; i++) {
+                let p = points[i];
+                if (i === 0) {
+                    ctx.moveTo(p.x, p.y);
+                } else {
+                    ctx.lineTo(p.x, p.y);
                 }
             }
+
+            // Estilo del trazo: Gradiente tornasolado (Verde esmeralda -> Dorado -> Penachos rojos)
+            let gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            gradient.addColorStop(0, '#004d26');
+            gradient.addColorStop(0.3, '#2e8b57');
+            gradient.addColorStop(0.7, '#d4af37');
+            gradient.addColorStop(1, '#8b0000');
+
+            ctx.strokeStyle = gradient;
+            ctx.lineWidth = 32; // Grosor máximo en la cabeza
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            
+            // Sombra realista estilo brillo divino / aura
+            ctx.shadowColor = 'rgba(212, 175, 55, 0.6)';
+            ctx.shadowBlur = 15;
+            ctx.stroke();
+
+            // Dibujar la cabeza detallada en la punta (índice 0)
+            let head = points[0];
+            let nextPoint = points[1];
+            let headAngle = Math.atan2(head.y - nextPoint.y, head.x - nextPoint.x);
+
+            ctx.save();
+            ctx.translate(head.x, head.y);
+            ctx.rotate(headAngle);
+
+            // Cabeza estilizada con Canvas (puedes reemplazar esto por una imagen `drawImage` si lo prefieres)
+            ctx.fillStyle = '#002613';
+            ctx.strokeStyle = '#ffd700';
+            ctx.lineWidth = 3;
+            
+            ctx.beginPath();
+            ctx.ellipse(0, 0, 22, 14, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // Ojos brillantes
+            ctx.fillStyle = '#ff4500';
+            ctx.beginPath();
+            ctx.arc(8, -5, 3, 0, Math.PI * 2);
+            ctx.arc(8, 5, 3, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.restore();
 
             requestAnimationFrame(animate);
         }
 
-        // Iniciar bucle de animación
         animate();
     </script>
 </body>
