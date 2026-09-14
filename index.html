@@ -44,7 +44,6 @@
     .mensaje.ok{background:#e6f4ea;color:var(--ok);border:1px solid #b7dfc1;}
     .mensaje.err{background:#fdecea;color:var(--err);border:1px solid #f3c1bd;}
     .cargando{font-size:12px;color:#666;}
-    .bloque-registro{border:1px dashed var(--borde);border-radius:6px;padding:12px;margin-bottom:10px;position:relative;}
     .acciones-final{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;}
     small.ayuda{color:#667;display:block;margin-top:2px;}
   </style>
@@ -61,9 +60,10 @@
        PANTALLA DE CARGA
        -----------------------------------------------------------
        Este HTML es un archivo INDEPENDIENTE: no lo sirve Apps Script.
-       La URL del script está fija en la constante SCRIPT_URL (ver <script>
-       más abajo) — no se pide nada al usuario. Ya no hay validación de
-       usuario/acceso, todo el que abra esta página puede usar los módulos.
+       La URL del script está fija en la constante SCRIPT_URL (ver el bloque
+       de código JavaScript al final del archivo) — no se pide nada al
+       usuario. Ya no hay validación de usuario/acceso, todo el que abra
+       esta página puede usar los módulos.
        ============================================================ -->
   <div class="caja" id="cajaCargando">
     <h2>Cargando…</h2>
@@ -111,11 +111,57 @@
         <option value="excel">2) Cargar desde Excel</option>
       </select>
 
-      <!-- 2.1 FORMULARIO MANUAL POR BLOQUES -->
+      <!-- 2.1 FORMULARIO MANUAL — un solo formulario; cada "Agregar" lo suma a la
+           lista de abajo (tabla de confirmación) y limpia los campos para el
+           siguiente registro. El envío real se hace desde esa lista. -->
       <div id="modo2Formulario">
-        <div id="contenedorBloques"></div>
+        <div class="fila-grid">
+          <div><label>Folio</label><input type="text" id="m2_folio"></div>
+          <div><label>ID SARE</label><input type="text" id="m2_idSare"></div>
+          <div><label>Nombre SARE</label><input type="text" id="m2_nombreSare"></div>
+          <div><label>Municipio</label><input type="text" id="m2_municipio"></div>
+          <div><label>CCT</label><input type="text" id="m2_cct"></div>
+          <div><label>Nombre de la escuela</label><input type="text" id="m2_escuela"></div>
+          <div><label>ID del becario/familia</label><input type="text" id="m2_idBecario"></div>
+          <div><label>Nombre del becario/tutor</label><input type="text" id="m2_nombreBecario"></div>
+          <div><label>Primer apellido</label><input type="text" id="m2_apellido1"></div>
+          <div><label>Segundo apellido</label><input type="text" id="m2_apellido2"></div>
+          <div><label>Remesa</label><input type="text" id="m2_remesa"></div>
+          <div>
+            <label>Programa</label>
+            <select id="m2_programa">
+              <option value="">Selecciona...</option><option>BASICA</option><option>BUEMS</option><option>JEF</option>
+            </select>
+          </div>
+          <div><label>Bloque</label><input type="text" id="m2_bloque"></div>
+          <div>
+            <label>OBS</label>
+            <select id="m2_obs">
+              <option value="">Selecciona o escribe abajo...</option>
+              <option>RECIBIDA DE OTRO ESTADO</option><option>NUEVA REMESA RECIBIDA</option>
+            </select>
+            <input type="text" placeholder="...o escribe un texto libre" id="m2_obsLibre" style="margin-top:4px;">
+          </div>
+          <div><label>Mes de remesa</label><input type="text" id="m2_mesRemesa"></div>
+          <div><label>CURP correcta (18)</label><input type="text" maxlength="18" id="m2_curp"></div>
+          <div>
+            <label>Estatus</label>
+            <select id="m2_estatus">
+              <option value="">Selecciona...</option>
+              <option>PERTENECE A LA SARE 1301</option><option>PERTENECE A LA SARE 1302</option>
+              <option>PERTENECE A LA SARE 1303</option><option>PERTENECE A LA SARE 1304</option>
+              <option>PERTENECE A LA SARE 1305</option><option>PERTENECE A LA SARE 1306</option>
+              <option>PERTENECE A LA SARE 1307</option>
+            </select>
+          </div>
+        </div>
         <div class="acciones-final">
-          <button class="btn-secundario" onclick="agregarBloqueModulo2()">+ Agregar registro al bloque</button>
+          <button class="btn-secundario" onclick="agregarRegistroModulo2()">+ Agregar registro al bloque</button>
+        </div>
+
+        <h3>Registros listos para enviar (<span id="contadorRegistrosM2">0</span>)</h3>
+        <div id="tablaRegistrosModulo2"><p style="font-size:12px;color:#667;">Aún no has agregado ningún registro.</p></div>
+        <div class="acciones-final">
           <button class="btn-primario" onclick="enviarBloqueModulo2()">Enviar bloque completo a BASE</button>
         </div>
       </div>
@@ -323,9 +369,7 @@
 // >>> PEGA AQUÍ LA URL DE IMPLEMENTACIÓN DEL SCRIPT (Implementar > Aplicación web) <<<
 // Ejemplo: 'https://script.google.com/macros/s/AKfycb.../exec'
 // ===================================================================================
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwJ6lOvp4aPWZrV2piGLf2t33NpyZxTz07cHbIgbz5a3YGglDpLUpWpyCgno_iBDp8h/exec';
-
-let bloqueContador = 0;
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzBzY22iwQQZ6FQrlWP0vJarlsE6Lt2CItmPceqeGnGxWurifnL-EYJIfB6-rAS-XQk/exec';
 
 /* ==================================================================================
    CONEXIÓN CON EL SCRIPT (reemplaza a google.script.run, ya que este HTML es
@@ -364,7 +408,6 @@ function iniciarApp() {
   }
   document.getElementById('cajaCargando').classList.add('oculto');
   document.getElementById('appPrincipal').classList.remove('oculto');
-  agregarBloqueModulo2(); // primer bloque inicial del módulo 2
   cargarFoliosDisponibles();
 }
 
@@ -440,99 +483,82 @@ function procesarModulo1() {
 
 /* ==================================================================================
    MÓDULO 2 — REGISTRO DE TARJETAS
+   -----------------------------------------------------------------------------
+   Los registros capturados en el formulario se van guardando en el arreglo
+   registrosModulo2 (en memoria del navegador) y se muestran en una tabla de
+   confirmación. Esto evita el problema anterior de apilar formularios
+   completos: ahora cada "Agregar" limpia el formulario y muestra lo capturado
+   en la tabla, dejando claro qué se va a enviar.
    ================================================================================== */
+let registrosModulo2 = [];
+
 function cambiarModoModulo2() {
   const modo = document.getElementById('selectorModo2').value;
   document.getElementById('modo2Formulario').classList.toggle('oculto', modo !== 'formulario');
   document.getElementById('modo2Excel').classList.toggle('oculto', modo !== 'excel');
 }
 
-function agregarBloqueModulo2() {
-  bloqueContador++;
-  const id = bloqueContador;
-  const div = document.createElement('div');
-  div.className = 'bloque-registro';
-  div.id = 'bloque_' + id;
-  div.innerHTML =
-    '<button type="button" class="btn-peligro" style="position:absolute;top:8px;right:8px;" onclick="quitarBloque(' + id + ')">Quitar</button>' +
-    '<div class="fila-grid">' +
-      campo(id, 'folio', 'Folio') +
-      campo(id, 'idSare', 'ID SARE') +
-      campo(id, 'nombreSare', 'Nombre SARE') +
-      campo(id, 'municipio', 'Municipio') +
-      campo(id, 'cct', 'CCT') +
-      campo(id, 'escuela', 'Nombre de la escuela') +
-      campo(id, 'idBecario', 'ID del becario/familia') +
-      campo(id, 'nombreBecario', 'Nombre del becario/tutor') +
-      campo(id, 'apellido1', 'Primer apellido') +
-      campo(id, 'apellido2', 'Segundo apellido') +
-      campo(id, 'remesa', 'Remesa') +
-      selectPrograma(id) +
-      campo(id, 'bloque', 'Bloque') +
-      selectObs(id) +
-      campo(id, 'mesRemesa', 'Mes de remesa') +
-      campoMax(id, 'curp', 'CURP correcta (18)', 18) +
-      selectEstatus(id) +
-    '</div>';
-  document.getElementById('contenedorBloques').appendChild(div);
+function agregarRegistroModulo2() {
+  const obs = val('m2_obsLibre').trim() !== '' ? val('m2_obsLibre') : val('m2_obs');
+  const registro = {
+    folio: val('m2_folio'), idSare: val('m2_idSare'), nombreSare: val('m2_nombreSare'),
+    municipio: val('m2_municipio'), cct: val('m2_cct'), escuela: val('m2_escuela'),
+    idBecario: val('m2_idBecario'), nombreBecario: val('m2_nombreBecario'),
+    apellido1: val('m2_apellido1'), apellido2: val('m2_apellido2'), remesa: val('m2_remesa'),
+    programa: val('m2_programa'), bloque: val('m2_bloque'), obs: obs,
+    mesRemesa: val('m2_mesRemesa'), curp: val('m2_curp'), estatus: val('m2_estatus')
+  };
+
+  if (registro.folio.trim() === '') {
+    mostrarMensaje('resultadoModulo2', 'El folio es obligatorio para agregar el registro.', 'err');
+    return;
+  }
+
+  registrosModulo2.push(registro);
+  renderizarTablaModulo2();
+  limpiarFormularioModulo2();
+  document.getElementById('resultadoModulo2').innerHTML = '';
 }
 
-function campo(id, nombre, etiqueta) {
-  return '<div><label>' + etiqueta + '</label><input type="text" id="b' + id + '_' + nombre + '"></div>';
-}
-function campoMax(id, nombre, etiqueta, max) {
-  return '<div><label>' + etiqueta + '</label><input type="text" maxlength="' + max + '" id="b' + id + '_' + nombre + '"></div>';
-}
-function selectPrograma(id) {
-  return '<div><label>Programa</label><select id="b' + id + '_programa">' +
-    '<option value="">Selecciona...</option><option>BASICA</option><option>BUEMS</option><option>JEF</option></select></div>';
-}
-function selectObs(id) {
-  return '<div><label>OBS</label><select id="b' + id + '_obs">' +
-    '<option value="">Selecciona o escribe abajo...</option>' +
-    '<option>RECIBIDA DE OTRO ESTADO</option><option>NUEVA REMESA RECIBIDA</option></select>' +
-    '<input type="text" placeholder="...o escribe un texto libre" id="b' + id + '_obsLibre" style="margin-top:4px;"></div>';
-}
-function selectEstatus(id) {
-  const opciones = ['PERTENECE A LA SARE 1301','PERTENECE A LA SARE 1302','PERTENECE A LA SARE 1303',
-    'PERTENECE A LA SARE 1304','PERTENECE A LA SARE 1305','PERTENECE A LA SARE 1306','PERTENECE A LA SARE 1307'];
-  let html = '<div><label>Estatus</label><select id="b' + id + '_estatus"><option value="">Selecciona...</option>';
-  opciones.forEach(function (o) { html += '<option>' + o + '</option>'; });
-  html += '</select></div>';
-  return html;
+function limpiarFormularioModulo2() {
+  ['m2_folio','m2_idSare','m2_nombreSare','m2_municipio','m2_cct','m2_escuela','m2_idBecario',
+   'm2_nombreBecario','m2_apellido1','m2_apellido2','m2_remesa','m2_bloque','m2_obsLibre',
+   'm2_mesRemesa','m2_curp'].forEach(function (id) { document.getElementById(id).value = ''; });
+  ['m2_programa','m2_obs','m2_estatus'].forEach(function (id) { document.getElementById(id).value = ''; });
+  document.getElementById('m2_folio').focus();
 }
 
-function quitarBloque(id) {
-  const el = document.getElementById('bloque_' + id);
-  if (el) el.remove();
+function renderizarTablaModulo2() {
+  document.getElementById('contadorRegistrosM2').innerText = registrosModulo2.length;
+  const cont = document.getElementById('tablaRegistrosModulo2');
+  if (registrosModulo2.length === 0) {
+    cont.innerHTML = '<p style="font-size:12px;color:#667;">Aún no has agregado ningún registro.</p>';
+    return;
+  }
+  let html = '<table><tr><th>#</th><th>Folio</th><th>Nombre becario/tutor</th><th>Programa</th><th>Estatus</th><th></th></tr>';
+  registrosModulo2.forEach(function (r, i) {
+    html += '<tr><td>' + (i + 1) + '</td><td>' + r.folio + '</td><td>' + r.nombreBecario + ' ' + r.apellido1 + ' ' + r.apellido2 +
+            '</td><td>' + r.programa + '</td><td>' + r.estatus + '</td>' +
+            '<td><button class="btn-peligro" onclick="quitarRegistroModulo2(' + i + ')">Quitar</button></td></tr>';
+  });
+  html += '</table>';
+  cont.innerHTML = html;
+}
+
+function quitarRegistroModulo2(indice) {
+  registrosModulo2.splice(indice, 1);
+  renderizarTablaModulo2();
 }
 
 function enviarBloqueModulo2() {
-  const bloques = document.querySelectorAll('.bloque-registro');
-  const registros = [];
-  bloques.forEach(function (div) {
-    const id = div.id.split('_')[1];
-    const val = function (campo) {
-      const el = document.getElementById('b' + id + '_' + campo);
-      return el ? el.value : '';
-    };
-    const obs = val('obsLibre').trim() !== '' ? val('obsLibre') : val('obs');
-    registros.push({
-      folio: val('folio'), idSare: val('idSare'), nombreSare: val('nombreSare'), municipio: val('municipio'),
-      cct: val('cct'), escuela: val('escuela'), idBecario: val('idBecario'), nombreBecario: val('nombreBecario'),
-      apellido1: val('apellido1'), apellido2: val('apellido2'), remesa: val('remesa'), programa: val('programa'),
-      bloque: val('bloque'), obs: obs, mesRemesa: val('mesRemesa'), curp: val('curp'), estatus: val('estatus')
-    });
-  });
-
-  if (registros.length === 0) { mostrarMensaje('resultadoModulo2', 'Agrega al menos un registro.', 'err'); return; }
+  if (registrosModulo2.length === 0) { mostrarMensaje('resultadoModulo2', 'Agrega al menos un registro antes de enviar.', 'err'); return; }
   mostrarMensaje('resultadoModulo2', 'Enviando bloque a BASE...', 'ok');
 
-  llamarApi('registrarBloqueModulo2', [registros])
+  llamarApi('registrarBloqueModulo2', [registrosModulo2])
     .then(function (res) {
       mostrarMensaje('resultadoModulo2', 'Bloque insertado: ' + res.insertados + ' registro(s) a partir de la fila ' + res.filaInicio + '.', 'ok');
-      document.getElementById('contenedorBloques').innerHTML = '';
-      agregarBloqueModulo2();
+      registrosModulo2 = [];
+      renderizarTablaModulo2();
     })
     .catch(function (err) { mostrarMensaje('resultadoModulo2', 'Error: ' + err.message, 'err'); });
 }
