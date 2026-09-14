@@ -1,247 +1,4895 @@
+
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quetzalcóatl Plumaje Completo</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #03050a;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow: hidden;
-        }
 
-        .web-content {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 75vw;
-            height: 75vh;
-            background: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
-            padding: 40px;
-            box-sizing: border-box;
-            z-index: 1;
-        }
+  <base target="_top">
 
-        #quetzalCanvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            pointer-events: none;
-            z-index: 9999;
-        }
-    </style>
+  <meta charset="UTF-8">
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <title>Gestión de Trámites</title>
+
+
+  <!-- ======================================================
+       LIBRERÍA SHEETJS
+       Permite leer archivos XLSX directamente desde el
+       navegador sin tener que subir físicamente el Excel
+       al servidor.
+       ====================================================== -->
+
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+
+      margin: 0;
+
+      font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+      background:
+        #f3f5f7;
+
+      color:
+        #1f2937;
+    }
+
+
+    .app {
+
+      max-width: 1450px;
+
+      margin:
+        auto;
+
+      padding:
+        20px;
+    }
+
+
+    .header {
+
+      background:
+        #ffffff;
+
+      border-radius:
+        14px;
+
+      padding:
+        20px 24px;
+
+      box-shadow:
+        0 2px 10px rgba(0,0,0,.06);
+
+      margin-bottom:
+        18px;
+    }
+
+
+    .header h1 {
+
+      margin:
+        0 0 6px 0;
+
+      font-size:
+        25px;
+    }
+
+
+    .header p {
+
+      margin:
+        0;
+
+      color:
+        #667085;
+    }
+
+
+    .access {
+
+      margin-top:
+        15px;
+
+      padding:
+        12px 15px;
+
+      border-radius:
+        9px;
+
+      background:
+        #f2f4f7;
+
+      font-size:
+        14px;
+    }
+
+
+    .config {
+
+      background:
+        #ffffff;
+
+      border-radius:
+        14px;
+
+      padding:
+        20px;
+
+      box-shadow:
+        0 2px 10px rgba(0,0,0,.06);
+
+      margin-bottom:
+        18px;
+    }
+
+
+    .config h2 {
+
+      margin-top:
+        0;
+    }
+
+
+    .grid {
+
+      display:
+        grid;
+
+      grid-template-columns:
+        repeat(auto-fit,minmax(230px,1fr));
+
+      gap:
+        14px;
+    }
+
+
+    .field {
+
+      display:
+        flex;
+
+      flex-direction:
+        column;
+
+      gap:
+        6px;
+    }
+
+
+    label {
+
+      font-weight:
+        600;
+
+      font-size:
+        13px;
+    }
+
+
+    input,
+    select,
+    textarea {
+
+      width:
+        100%;
+
+      padding:
+        10px 11px;
+
+      border:
+        1px solid #d0d5dd;
+
+      border-radius:
+        8px;
+
+      background:
+        white;
+
+      font-size:
+        14px;
+
+      outline:
+        none;
+    }
+
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+
+      border-color:
+        #667085;
+
+      box-shadow:
+        0 0 0 2px rgba(102,112,133,.12);
+    }
+
+
+    textarea {
+
+      min-height:
+        80px;
+
+      resize:
+        vertical;
+    }
+
+
+    button {
+
+      border:
+        none;
+
+      border-radius:
+        8px;
+
+      padding:
+        10px 15px;
+
+      cursor:
+        pointer;
+
+      font-weight:
+        600;
+
+      background:
+        #344054;
+
+      color:
+        white;
+    }
+
+
+    button:hover {
+
+      opacity:
+        .90;
+    }
+
+
+    button.secondary {
+
+      background:
+        #667085;
+    }
+
+
+    button.success {
+
+      background:
+        #16794c;
+    }
+
+
+    button.danger {
+
+      background:
+        #b42318;
+    }
+
+
+    button:disabled {
+
+      opacity:
+        .45;
+
+      cursor:
+        not-allowed;
+    }
+
+
+    .navigation {
+
+      display:
+        grid;
+
+      grid-template-columns:
+        repeat(4,1fr);
+
+      gap:
+        10px;
+
+      margin-bottom:
+        18px;
+    }
+
+
+    .nav-button {
+
+      background:
+        #ffffff;
+
+      color:
+        #344054;
+
+      border:
+        1px solid #d0d5dd;
+    }
+
+
+    .nav-button.active {
+
+      background:
+        #344054;
+
+      color:
+        white;
+    }
+
+
+    .module {
+
+      display:
+        none;
+
+      background:
+        #ffffff;
+
+      border-radius:
+        14px;
+
+      padding:
+        22px;
+
+      box-shadow:
+        0 2px 10px rgba(0,0,0,.06);
+    }
+
+
+    .module.active {
+
+      display:
+        block;
+    }
+
+
+    .module h2 {
+
+      margin-top:
+        0;
+
+      margin-bottom:
+        5px;
+    }
+
+
+    .description {
+
+      color:
+        #667085;
+
+      font-size:
+        14px;
+
+      margin-bottom:
+        20px;
+    }
+
+
+    .section {
+
+      border:
+        1px solid #eaecf0;
+
+      border-radius:
+        10px;
+
+      padding:
+        17px;
+
+      margin-bottom:
+        18px;
+    }
+
+
+    .section-title {
+
+      font-size:
+        16px;
+
+      font-weight:
+        700;
+
+      margin-bottom:
+        15px;
+    }
+
+
+    .actions {
+
+      display:
+        flex;
+
+      gap:
+        10px;
+
+      flex-wrap:
+        wrap;
+
+      margin-top:
+        15px;
+    }
+
+
+    .status {
+
+      padding:
+        10px 13px;
+
+      border-radius:
+        8px;
+
+      background:
+        #f2f4f7;
+
+      margin-top:
+        12px;
+
+      font-size:
+        13px;
+    }
+
+
+    .hidden {
+
+      display:
+        none !important;
+    }
+
+
+    table {
+
+      width:
+        100%;
+
+      border-collapse:
+        collapse;
+
+      margin-top:
+        15px;
+    }
+
+
+    th,
+    td {
+
+      padding:
+        9px;
+
+      border-bottom:
+        1px solid #eaecf0;
+
+      text-align:
+        left;
+
+      font-size:
+        13px;
+    }
+
+
+    th {
+
+      background:
+        #f9fafb;
+    }
+
+
+    .preview {
+
+      max-height:
+        280px;
+
+      overflow:
+        auto;
+
+      border:
+        1px solid #eaecf0;
+
+      border-radius:
+        8px;
+
+      margin-top:
+        12px;
+    }
+
+
+    .record-card {
+
+      border:
+        1px solid #d0d5dd;
+
+      border-radius:
+        9px;
+
+      padding:
+        12px;
+
+      margin-top:
+        10px;
+
+      cursor:
+        pointer;
+    }
+
+
+    .record-card:hover {
+
+      background:
+        #f9fafb;
+    }
+
+
+    .record-card.selected {
+
+      border:
+        2px solid #344054;
+
+      background:
+        #f9fafb;
+    }
+
+
+    .small {
+
+      font-size:
+        12px;
+
+      color:
+        #667085;
+    }
+
+
+    .required::after {
+
+      content:
+        " *";
+
+      color:
+        #b42318;
+    }
+
+
+    @media(max-width:800px) {
+
+      .navigation {
+
+        grid-template-columns:
+          1fr 1fr;
+      }
+    }
+
+
+    @media(max-width:550px) {
+
+      .navigation {
+
+        grid-template-columns:
+          1fr;
+      }
+
+      .app {
+
+        padding:
+          10px;
+      }
+    }
+
+  </style>
+
 </head>
+
+
 <body>
 
-    <div class="web-content">
-        <h1>Quetzalcóatl: Cuerpo Emplumado Realista</h1>
-        <p>Todo el cuerpo cuenta con un diseño detallado de plumas verdes esmeralda y destellos rojos, con una velocidad de desplazamiento más pausada y solemne.</p>
+<div class="app">
+
+
+  <!-- ======================================================
+       ENCABEZADO
+       ====================================================== -->
+
+  <div class="header">
+
+    <h1>GESTIÓN DE TRÁMITES</h1>
+
+    <p>
+      Aplicación web para administración de BASE y TRAMITES.
+    </p>
+
+    <div id="accessInfo"
+         class="access">
+      Verificando acceso...
     </div>
 
-    <canvas id="quetzalCanvas"></canvas>
+  </div>
 
-    <script>
-        const canvas = document.getElementById('quetzalCanvas');
-        const ctx = canvas.getContext('2d');
 
-        function resize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+
+  <!-- ======================================================
+       CONFIGURACIÓN DE LIBROS
+       ====================================================== -->
+
+  <div class="config">
+
+    <h2>CONFIGURACIÓN</h2>
+
+    <div class="grid">
+
+      <div class="field">
+
+        <label class="required">
+          URL DEL LIBRO BASE / USUARIOS
+        </label>
+
+        <input
+          type="text"
+          id="baseUrl"
+          placeholder="https://docs.google.com/spreadsheets/d/..."
+        >
+
+      </div>
+
+
+      <div class="field">
+
+        <label>
+          URL DE LA WEB APP TRAMITES
+        </label>
+
+        <input
+          type="text"
+          id="tramitesWebUrl"
+          placeholder="https://script.google.com/macros/s/..."
+        >
+
+        <span class="small">
+          Se guarda como configuración. Las llamadas internas
+          de esta página utilizan google.script.run.
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <div class="actions">
+
+      <button onclick="guardarConfiguracion()">
+        GUARDAR CONFIGURACIÓN
+      </button>
+
+      <button
+        class="secondary"
+        onclick="verificarAcceso()">
+        VERIFICAR ACCESO
+      </button>
+
+    </div>
+
+  </div>
+
+
+
+  <!-- ======================================================
+       NAVEGACIÓN
+       SOLO SE MUESTRA A EDITORES
+       ====================================================== -->
+
+  <div id="navigation"
+       class="navigation hidden">
+
+    <button
+      class="nav-button active"
+      onclick="showModule(1)">
+      MÓDULO 1
+    </button>
+
+    <button
+      class="nav-button"
+      onclick="showModule(2)">
+      MÓDULO 2
+    </button>
+
+    <button
+      class="nav-button"
+      onclick="showModule(3)">
+      MÓDULO 3
+    </button>
+
+    <button
+      class="nav-button"
+      onclick="showModule(4)">
+      MÓDULO 4
+    </button>
+
+  </div>
+
+
+
+  <!-- ======================================================
+       MODULO 1
+       EXCEL -> BASE
+       ====================================================== -->
+
+  <section
+    id="module1"
+    class="module active">
+
+    <h2>MÓDULO 1 — ACTUALIZACIÓN DESDE EXCEL</h2>
+
+    <div class="description">
+
+      Carga un Excel con información en las columnas A, B y C.
+      Se busca A del Excel en la columna A de BASE.
+      Cuando existe coincidencia:
+      <strong>B del Excel → S de BASE</strong> y
+      <strong>C del Excel → P de BASE</strong>.
+      No se modifican las demás columnas.
+
+    </div>
+
+
+    <div class="section">
+
+      <div class="field">
+
+        <label class="required">
+          ARCHIVO EXCEL
+        </label>
+
+        <input
+          type="file"
+          id="excelModulo1"
+          accept=".xlsx,.xls,.csv"
+          onchange="previewModulo1()">
+
+      </div>
+
+
+      <div id="previewM1"
+           class="preview hidden"></div>
+
+
+      <div class="actions">
+
+        <button
+          id="btnProcesarM1"
+          onclick="procesarModulo1()"
+          disabled>
+
+          PROCESAR EXCEL
+
+        </button>
+
+      </div>
+
+
+      <div id="statusM1"
+           class="status">
+
+        Selecciona un archivo Excel.
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+
+  <!-- ======================================================
+       MODULO 2
+       REGISTRO BASE
+       ====================================================== -->
+
+  <section
+    id="module2"
+    class="module">
+
+    <h2>MÓDULO 2 — REGISTRO EN BASE</h2>
+
+    <div class="description">
+
+      Permite registrar una o varias tarjetas nuevas.
+      Los registros se acumulan en un bloque y se envían
+      juntos a BASE.
+
+    </div>
+
+
+    <div class="section">
+
+      <div class="field">
+
+        <label class="required">
+          TIPO DE REGISTRO
+        </label>
+
+        <select
+          id="tipoRegistroBase"
+          onchange="cambiarTipoRegistroBase()">
+
+          <option value="">
+            SELECCIONAR
+          </option>
+
+          <option value="MANUAL">
+            REGISTRO DE UNA O MAS TARJETAS NUEVAS O DE OTROS ESTADOS
+          </option>
+
+          <option value="EXCEL">
+            CARGA MASIVA DESDE EXCEL
+          </option>
+
+        </select>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- ====================================================
+         MODULO 2 - OPCION MANUAL
+         ==================================================== -->
+
+    <div
+      id="baseManual"
+      class="hidden">
+
+
+      <div class="section">
+
+        <div class="section-title">
+          DATOS DE LA TARJETA
+        </div>
+
+
+        <div class="grid">
+
+
+          <div class="field">
+
+            <label class="required">
+              FOLIO
+            </label>
+
+            <input
+              id="b_folio"
+              type="text"
+              data-uppercase>
+
+          </div>
+
+
+          <div class="field">
+
+            <label>ID SARE</label>
+
+            <input
+              id="b_idSare"
+              type="text"
+              data-uppercase>
+
+          </div>
+
+
+          <div class="field">
+
+            <label>NOMBRE SARE</label>
+
+            <input
+              id="b_nombreSare"
+              data-uppercase>
+
+          </div>
+
+
+          <div class="field">
+
+            <label>MUNICIPIO</label>
+
+            <input
+              id="b_municipio"
+              data-uppercase>
+
+          </div>
+
+
+          <div class="field">
+
+            <label>CCT</label>
+
+            <input
+              id="b_cct"
+              data-uppercase>
+
+          </div>
+
+
+          <div class="field">
+
+            <label>NOMBRE DE LA ESCUELA</label>
+
+            <input
+              id="b_nombreEscuela"
+              data-uppercase>
+
+          </div>
+
+
+          <div class="field">
+
+            <label>ID DEL BECARIO/FAMILIA</label>
+
+            <input
+              id="b_idBecario"
+              type="text">
+
+          </div>
+
+
+          <div class="field">
+
+            <label>NOMBRE DEL BECARIO/TUTOR</label>
+
+            <input
+              id="b_nombre"
+              data-uppercase>
+
+          </div>
+
+
+          <div class="field">
+
+            <label>PRIMER APELLIDO</label>
+
+            <input
+              id="b_primerApellido"
+              data-uppercase>
+
+          </div>
+
+
+          <div class="field">
+
+            <label>SEGUNDO APELLIDO</label>
+
+            <input
+              id="b_segundoApellido"
+              data-uppercase>
+
+          </div>
+
+
+          <div class="field">
+
+            <label>REMESA</label>
+
+            <input
+              id="b_remesa"
+              data-uppercase>
+
+          </div>
+
+
+          <div class="field">
+
+            <label>PROGRAMA</label>
+
+            <select id="b_programa">
+
+              <option value="">SELECCIONAR</option>
+
+              <option>BASICA</option>
+              <option>BUEMS</option>
+              <option>JEF</option>
+
+            </select>
+
+          </div>
+
+
+          <div class="field">
+
+            <label>BLOQUE</label>
+
+            <input
+              id="b_bloque"
+              data-uppercase>
+
+          </div>
+
+
+          <div class="field">
+
+            <label>OBS</label>
+
+            <select
+              id="b_obsSelect"
+              onchange="cambiarObs()">
+
+              <option value="">
+                SELECCIONAR
+              </option>
+
+              <option>
+                RECIBIDA DE OTRO ESTADO
+              </option>
+
+              <option>
+                NUEVA REMESA RECIBIDA
+              </option>
+
+              <option value="MANUAL">
+                ESCRIBIR MANUALMENTE
+              </option>
+
+            </select>
+
+            <input
+              id="b_obsManual"
+              class="hidden"
+              placeholder="ESCRIBIR OBSERVACIÓN"
+              data-uppercase>
+
+          </div>
+
+
+          <div class="field">
+
+            <label>MES DE REMESA</label>
+
+            <input
+              id="b_mesRemesa"
+              data-uppercase>
+
+          </div>
+
+
+          <div class="field">
+
+            <label>CURP CORRECTA</label>
+
+            <input
+              id="b_curp"
+              maxlength="18"
+              data-uppercase>
+
+          </div>
+
+
+          <div class="field">
+
+            <label>ESTATUS</label>
+
+            <select id="b_estatus">
+
+              <option value="">
+                SELECCIONAR
+              </option>
+
+              <option>PERTENECE A LA SARE 1301</option>
+              <option>PERTENECE A LA SARE 1302</option>
+              <option>PERTENECE A LA SARE 1303</option>
+              <option>PERTENECE A LA SARE 1304</option>
+              <option>PERTENECE A LA SARE 1305</option>
+              <option>PERTENECE A LA SARE 1306</option>
+              <option>PERTENECE A LA SARE 1307</option>
+
+            </select>
+
+          </div>
+
+        </div>
+
+
+        <div class="actions">
+
+          <button
+            class="secondary"
+            onclick="agregarRegistroBase()">
+
+            AGREGAR AL BLOQUE
+
+          </button>
+
+          <button
+            class="success"
+            onclick="guardarBloqueBase()">
+
+            GUARDAR TODO EL BLOQUE
+
+          </button>
+
+          <button
+            class="danger"
+            onclick="limpiarBloqueBase()">
+
+            LIMPIAR BLOQUE
+
+          </button>
+
+        </div>
+
+      </div>
+
+
+
+      <div class="section">
+
+        <div class="section-title">
+          REGISTROS PENDIENTES DEL BLOQUE
+        </div>
+
+        <div id="baseBlockCount">
+          0 registros
+        </div>
+
+        <div
+          id="baseBlockTable"
+          class="preview">
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- ====================================================
+         MODULO 2 - EXCEL
+         ==================================================== -->
+
+    <div
+      id="baseExcel"
+      class="hidden">
+
+
+      <div class="section">
+
+        <div class="section-title">
+          CARGA MASIVA DESDE EXCEL
+        </div>
+
+
+        <p class="small">
+
+          La primera fila del Excel debe contener los
+          encabezados. El sistema identifica las columnas
+          por nombre y genera automáticamente NOMBRE COMPLETO
+          y FECHA DE REGISTRO.
+
+        </p>
+
+
+        <input
+          type="file"
+          id="excelModulo2"
+          accept=".xlsx,.xls,.csv"
+          onchange="previewModulo2()">
+
+
+        <div
+          id="previewM2"
+          class="preview hidden">
+
+        </div>
+
+
+        <div class="actions">
+
+          <button
+            id="btnProcesarM2"
+            onclick="procesarModulo2()"
+            disabled>
+
+            CARGAR EXCEL A BASE
+
+          </button>
+
+        </div>
+
+
+        <div
+          id="statusM2"
+          class="status">
+
+          Selecciona un archivo.
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+
+  <!-- ======================================================
+       MODULO 3
+       TRAMITES
+       ====================================================== -->
+
+  <section
+    id="module3"
+    class="module">
+
+    <h2>MÓDULO 3 — REGISTRO DE TRÁMITES</h2>
+
+    <div class="description">
+
+      Registra trámites directamente en la hoja TRAMITES
+      del libro donde está instalado este Script.
+
+    </div>
+
+
+
+    <div class="section">
+
+      <div class="field">
+
+        <label class="required">
+          TIPO DE TRÁMITE
+        </label>
+
+        <select
+          id="tipoTramite"
+          onchange="cambiarTramite()">
+
+          <option value="">
+            SELECCIONAR
+          </option>
+
+          <option>
+            CUT (CAMBIO DE UBICACION DE TARJETA)
+          </option>
+
+          <option>
+            RVP=Renuncia Voluntaria al Programa
+          </option>
+
+          <option>
+            RDC=Reimpresión o Duplicado de Contrato Bancario
+          </option>
+
+          <option>
+            RDT=Reposicion de Tarjeta (Robo o Extravío)
+          </option>
+
+          <option>
+            CDT=Cambio de Tutor
+          </option>
+
+          <option>
+            BDI=Baja de Integrante/ Registro
+          </option>
+
+        </select>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- ====================================================
+         RESPONSABLE DE ATENCION
+         ==================================================== -->
+
+    <div class="section">
+
+      <div class="section-title">
+        RESPONSABLE DE ATENCION
+      </div>
+
+
+      <div class="grid">
+
+        <div class="field">
+
+          <label>SARE</label>
+
+          <input
+            id="t_sare"
+            data-uppercase>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>ESTATUS DE FICHA</label>
+
+          <select id="t_estatusFicha">
+
+            <option value="">
+              SELECCIONAR
+            </option>
+
+            <option>U=Utilizada</option>
+            <option>FB=Formato en Blanco</option>
+            <option>D=Dañada</option>
+            <option>C=Cancelada</option>
+            <option>E=Extraviada</option>
+
+          </select>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>CUPO DE QUIEN ELABORA</label>
+
+          <input
+            id="t_cupo"
+            data-uppercase>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>FECHA DE ELABORACION</label>
+
+          <input
+            id="t_fechaElaboracion"
+            type="date">
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- ====================================================
+         DATOS DEL SOLICITANTE
+         ==================================================== -->
+
+    <div class="section">
+
+      <div class="section-title">
+        DATOS DEL SOLICITANTE
+      </div>
+
+
+      <div class="grid">
+
+
+        <div class="field">
+
+          <label>ID FAMILIA SOLICITANTE</label>
+
+          <input
+            id="t_idFamilia"
+            type="text">
+
+        </div>
+
+
+        <div class="field">
+
+          <label>NOMBRE SOLICITANTE</label>
+
+          <input
+            id="t_nombre"
+            data-uppercase>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>PRIMER APELLIDO</label>
+
+          <input
+            id="t_primerApellido"
+            data-uppercase>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>SEGUNDO APELLIDO</label>
+
+          <input
+            id="t_segundoApellido"
+            data-uppercase>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>CURP SOLICITANTE</label>
+
+          <input
+            id="t_curp"
+            maxlength="18"
+            data-uppercase>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>NÚM. DE TELEFONO</label>
+
+          <input
+            id="t_telefono"
+            maxlength="10"
+            inputmode="numeric">
+
+        </div>
+
+
+        <div class="field">
+
+          <label>CORREO ELECTRONICO</label>
+
+          <input
+            id="t_email"
+            type="email"
+            data-uppercase>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- ====================================================
+         FOLIO UNICO
+         RDC / RDT
+         ==================================================== -->
+
+    <div
+      id="folioUnicoSection"
+      class="section hidden">
+
+      <div class="section-title">
+        FOLIO UNICO
+      </div>
+
+
+      <div class="field">
+
+        <label>
+          FOLIO UNICO DISPONIBLE
+        </label>
+
+        <select
+          id="t_folioUnico">
+
+          <option value="">
+            CARGANDO...
+          </option>
+
+        </select>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- ====================================================
+         CUT
+         ==================================================== -->
+
+    <div
+      id="sectionCUT"
+      class="section hidden">
+
+      <div class="section-title">
+        CUT — CAMBIO DE UBICACION DE TARJETA
+      </div>
+
+
+      <div class="grid">
+
+        <div class="field">
+
+          <label>CLAVE DEL ESTADO</label>
+
+          <input
+            id="t_claveEstado"
+            data-uppercase>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>NOMBRE DEL ESTADO</label>
+
+          <input
+            id="t_nombreEstado"
+            data-uppercase>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>SARE DE PROCEDENCIA</label>
+
+          <select id="t_sareProcedencia">
+
+            <option value="">
+              SELECCIONAR
+            </option>
+
+            <option>1301</option>
+            <option>1302</option>
+            <option>1303</option>
+            <option>1304</option>
+            <option>1305</option>
+            <option>1306</option>
+            <option>1307</option>
+
+          </select>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>C.C.T.</label>
+
+          <input
+            id="t_cct"
+            maxlength="10"
+            inputmode="numeric">
+
+        </div>
+
+
+        <div class="field">
+
+          <label>NOMBRE DE LA ESCUELA</label>
+
+          <input
+            id="t_escuela"
+            data-uppercase>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>PROGRAMA</label>
+
+          <select id="t_programa">
+
+            <option value="">
+              SELECCIONAR
+            </option>
+
+            <option>RC</option>
+            <option>BUEMS</option>
+            <option>JEF</option>
+
+          </select>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- ====================================================
+         RVP
+         ==================================================== -->
+
+    <div
+      id="sectionRVP"
+      class="section hidden">
+
+      <div class="section-title">
+        RVP — RENUNCIA VOLUNTARIA
+      </div>
+
+
+      <div class="field">
+
+        <label>MOTIVO DE LA RENUNCIA</label>
+
+        <textarea
+          id="t_motivo"
+          data-uppercase></textarea>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- ====================================================
+         RDT
+         ==================================================== -->
+
+    <div
+      id="sectionRDT"
+      class="section hidden">
+
+      <div class="section-title">
+        RDT — REPOSICIÓN DE TARJETA
+      </div>
+
+
+      <div class="field">
+
+        <label>
+          NÚM. DE FOLIO DEL REPORTE ANTE EL BANCO DE BIENESTAR
+        </label>
+
+        <input
+          id="t_folioBanco"
+          data-uppercase>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- ====================================================
+         CDT
+         ==================================================== -->
+
+    <div
+      id="sectionCDT"
+      class="section hidden">
+
+      <div class="section-title">
+        CDT — CAMBIO DE TUTOR
+      </div>
+
+
+      <div class="grid">
+
+        <div class="field">
+
+          <label>CAUSAL DEL CAMBIO DE TUTOR</label>
+
+          <textarea
+            id="t_causalTutor"
+            data-uppercase></textarea>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>NOMBRE</label>
+
+          <input
+            id="t_nombreTutor"
+            data-uppercase>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>PRIMER APELLIDO</label>
+
+          <input
+            id="t_apellidoTutor1"
+            data-uppercase>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>SEGUNDO APELLIDO</label>
+
+          <input
+            id="t_apellidoTutor2"
+            data-uppercase>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>CURP INTEGRANTE-BAJA</label>
+
+          <input
+            id="t_curpTutor"
+            maxlength="18"
+            data-uppercase>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>FECHA DE VALIDACION</label>
+
+          <input
+            id="t_fechaValidacionCDT"
+            type="date">
+
+        </div>
+
+
+        <div class="field">
+
+          <label>FOLIO SIBUEB O FORMULARIO</label>
+
+          <input
+            id="t_folioSibuebCDT"
+            data-uppercase>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- ====================================================
+         BDI
+         ==================================================== -->
+
+    <div
+      id="sectionBDI"
+      class="section hidden">
+
+      <div class="section-title">
+        BDI — BAJA DE INTEGRANTE / REGISTRO
+      </div>
+
+
+      <div class="grid">
+
+
+        <div class="field">
+
+          <label>ID_INTEGRANTE</label>
+
+          <input
+            id="t_idIntegrante"
+            type="text">
+
+        </div>
+
+
+        <div class="field">
+
+          <label>NOMBRE INTEGRANTE-BAJA</label>
+
+          <input
+            id="t_nombreIntegrante"
+            data-uppercase>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>PRIMER APELLIDO</label>
+
+          <input
+            id="t_apellidoIntegrante1"
+            data-uppercase>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>SEGUNDO APELLIDO</label>
+
+          <input
+            id="t_apellidoIntegrante2"
+            data-uppercase>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>CURP INTEGRANTE-BAJA</label>
+
+          <input
+            id="t_curpIntegrante"
+            maxlength="18"
+            data-uppercase>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>FECHA DE VALIDACION</label>
+
+          <input
+            id="t_fechaValidacionBDI"
+            type="date">
+
+        </div>
+
+
+        <div class="field">
+
+          <label>FOLIO SIBUEB O FORMULARIO</label>
+
+          <input
+            id="t_folioSibuebBDI"
+            data-uppercase>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+
+    <div class="actions">
+
+      <button
+        class="success"
+        onclick="guardarTramite()">
+
+        GUARDAR TRÁMITE
+
+      </button>
+
+      <button
+        class="danger"
+        onclick="limpiarFormularioTramite()">
+
+        LIMPIAR
+
+      </button>
+
+    </div>
+
+
+    <div
+      id="statusM3"
+      class="status">
+
+      Selecciona el tipo de trámite.
+
+    </div>
+
+  </section>
+
+
+
+  <!-- ======================================================
+       MODULO 4
+       EDICIÓN
+       ====================================================== -->
+
+  <section
+    id="module4"
+    class="module">
+
+    <h2>MÓDULO 4 — CONSULTA Y EDICIÓN</h2>
+
+    <div class="description">
+
+      Permite buscar registros del módulo 3 mediante
+      FOLIO o CURP del solicitante y posteriormente
+      modificar todos los campos del registro.
+
+    </div>
+
+
+    <div class="section">
+
+      <div class="grid">
+
+
+        <div class="field">
+
+          <label>BUSCAR POR</label>
+
+          <select id="searchType">
+
+            <option value="FOLIO">
+              FOLIO
+            </option>
+
+            <option value="CURP">
+              CURP DEL SOLICITANTE
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>VALOR A BUSCAR</label>
+
+          <input
+            id="searchTerm"
+            data-uppercase>
+
+        </div>
+
+      </div>
+
+
+      <div class="actions">
+
+        <button onclick="buscarTramite()">
+          BUSCAR
+        </button>
+
+      </div>
+
+
+      <div
+        id="searchResults">
+      </div>
+
+    </div>
+
+
+
+    <div
+      id="editSection"
+      class="hidden">
+
+      <!--
+
+        Para mantener la misma estructura del formulario,
+        reutilizamos el formulario del módulo 3.
+
+        Al seleccionar un resultado:
+        1. se carga la información;
+        2. se activa edición;
+        3. el botón cambia a ACTUALIZAR.
+
+      -->
+
+
+      <div class="section">
+
+        <div class="section-title">
+          REGISTRO SELECCIONADO
+        </div>
+
+
+        <input
+          type="hidden"
+          id="editRow">
+
+
+        <div
+          id="editSummary"
+          class="status">
+
+        </div>
+
+      </div>
+
+
+      <!--
+        El formulario de edición se genera dinámicamente
+        mediante JavaScript utilizando la misma estructura
+        lógica del módulo 3.
+      -->
+
+      <div id="editFormContainer"></div>
+
+
+      <div class="actions">
+
+        <button
+          class="success"
+          onclick="actualizarTramite()">
+
+          ACTUALIZAR REGISTRO
+
+        </button>
+
+      </div>
+
+
+      <div
+        id="statusM4"
+        class="status">
+
+      </div>
+
+    </div>
+
+  </section>
+
+</div>
+
+
+
+<script>
+
+/* ============================================================
+   VARIABLES GLOBALES DEL HTML
+   ============================================================ */
+
+let BASE_URL = 'https://script.google.com/macros/s/AKfycbzF1G9Eunl8KoaGmo7aSzFCZpg0Dln6tRJnvIkNBywGLiBYD483lKdqT5Ka8jNGvI-d/exec';
+let TRAMITES_WEB_URL = 'https://script.google.com/macros/s/AKfycby2u2xExCNKRmL1WBvolk4iHYZga9AEKQeDrXFbonhMyS49skzGIcWTdyPnMAkd70Na/exec';
+
+let accessGranted = false;
+
+let baseBlock = [];
+
+let excelDataModulo1 = null;
+let excelDataModulo2 = null;
+
+let editingRecord = null;
+
+
+/* ============================================================
+   INICIO
+   ============================================================ */
+
+document.addEventListener('DOMContentLoaded', function() {
+
+  cargarConfiguracion();
+
+  prepararMayusculas();
+
+  prepararLimitaciones();
+
+});
+
+
+/* ============================================================
+   CONFIGURACIÓN LOCAL
+   ============================================================ */
+
+function cargarConfiguracion() {
+
+  BASE_URL =
+    localStorage.getItem('BASE_URL') || '';
+
+  TRAMITES_WEB_URL =
+    localStorage.getItem('TRAMITES_WEB_URL') || '';
+
+
+  document.getElementById('baseUrl').value =
+    BASE_URL;
+
+  document.getElementById('tramitesWebUrl').value =
+    TRAMITES_WEB_URL;
+
+
+  if (BASE_URL) {
+    verificarAcceso();
+  }
+}
+
+
+function guardarConfiguracion() {
+
+  BASE_URL =
+    document.getElementById('baseUrl').value.trim();
+
+  TRAMITES_WEB_URL =
+    document.getElementById('tramitesWebUrl').value.trim();
+
+
+  if (!BASE_URL) {
+
+    alert(
+      'Debes proporcionar la URL del libro que contiene BASE y USUARIOS.'
+    );
+
+    return;
+  }
+
+
+  localStorage.setItem(
+    'BASE_URL',
+    BASE_URL
+  );
+
+
+  localStorage.setItem(
+    'TRAMITES_WEB_URL',
+    TRAMITES_WEB_URL
+  );
+
+
+  verificarAcceso();
+}
+
+
+/* ============================================================
+   VERIFICACIÓN DE ACCESO
+   ============================================================ */
+
+function verificarAcceso() {
+
+  BASE_URL =
+    document.getElementById('baseUrl').value.trim();
+
+
+  if (!BASE_URL) {
+
+    document.getElementById('accessInfo').textContent =
+      'Indica la URL del libro BASE / USUARIOS.';
+
+    return;
+  }
+
+
+  document.getElementById('accessInfo').textContent =
+    'Verificando autorización...';
+
+
+  google.script.run
+
+    .withSuccessHandler(function(result) {
+
+      if (
+        result &&
+        result.ok &&
+        result.isEditor
+      ) {
+
+        accessGranted = true;
+
+        document.getElementById('accessInfo').innerHTML =
+          '<strong>USUARIO:</strong> ' +
+          escapeHtml(result.email) +
+          ' &nbsp; | &nbsp; ' +
+          '<strong>ROL:</strong> ' +
+          escapeHtml(result.role) +
+          ' &nbsp; | &nbsp; ACCESO AUTORIZADO';
+
+        document
+          .getElementById('navigation')
+          .classList.remove('hidden');
+
+
+        guardarConfiguracionSilenciosa();
+
+
+      } else {
+
+        accessGranted = false;
+
+        document
+          .getElementById('navigation')
+          .classList.add('hidden');
+
+
+        document.getElementById('accessInfo').textContent =
+          result.message ||
+          'Acceso no autorizado.';
+      }
+
+    })
+
+    .withFailureHandler(function(error) {
+
+      accessGranted = false;
+
+      document
+        .getElementById('navigation')
+        .classList.add('hidden');
+
+
+      document.getElementById('accessInfo').textContent =
+        'ERROR: ' +
+        error.message;
+
+    })
+
+    .getAccessInfo(BASE_URL);
+}
+
+
+function guardarConfiguracionSilenciosa() {
+
+  localStorage.setItem(
+    'BASE_URL',
+    BASE_URL
+  );
+
+  localStorage.setItem(
+    'TRAMITES_WEB_URL',
+    document
+      .getElementById('tramitesWebUrl')
+      .value.trim()
+  );
+}
+
+
+/* ============================================================
+   NAVEGACIÓN
+   ============================================================ */
+
+function showModule(number) {
+
+  if (!accessGranted) {
+
+    alert(
+      'No tienes autorización EDITOR.'
+    );
+
+    return;
+  }
+
+
+  document
+    .querySelectorAll('.module')
+    .forEach(function(module) {
+
+      module.classList.remove('active');
+
+    });
+
+
+  document
+    .getElementById(
+      'module' + number
+    )
+    .classList.add('active');
+
+
+  document
+    .querySelectorAll('.nav-button')
+    .forEach(function(button) {
+
+      button.classList.remove('active');
+
+    });
+
+
+  document
+    .querySelectorAll('.nav-button')
+    [number - 1]
+    .classList.add('active');
+
+
+  if (number === 3) {
+
+    cargarFoliosDisponibles();
+
+  }
+
+}
+
+
+/* ============================================================
+   MAYÚSCULAS AUTOMÁTICAS
+   ============================================================ */
+
+function prepararMayusculas() {
+
+  document
+    .querySelectorAll('[data-uppercase]')
+    .forEach(function(input) {
+
+      input.addEventListener(
+        'input',
+        function() {
+
+          const start =
+            this.selectionStart;
+
+          const end =
+            this.selectionEnd;
+
+
+          this.value =
+            this.value.toUpperCase();
+
+
+          try {
+
+            this.setSelectionRange(
+              start,
+              end
+            );
+
+          } catch (e) {}
+
         }
-        window.addEventListener('resize', resize);
-        resize();
+      );
 
-        const numPoints = 85;
-        const points = [];
-        let progress = 0;
-        let speed = 0.00045; // Velocidad reducida para un movimiento más lento y majestuoso
+    });
+}
 
-        for (let i = 0; i < numPoints; i++) {
-            points.push({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
+
+/* ============================================================
+   LIMITACIONES DE CAMPOS
+   ============================================================ */
+
+function prepararLimitaciones() {
+
+
+  document
+    .querySelectorAll(
+      '#b_curp, #t_curp, #t_curpTutor, #t_curpIntegrante'
+    )
+    .forEach(function(input) {
+
+      input.addEventListener(
+        'input',
+        function() {
+
+          this.value =
+            this.value
+              .toUpperCase()
+              .substring(0,18);
+
         }
+      );
 
-        function getPerimeterPoint(p) {
-            let w = window.innerWidth;
-            let h = window.innerHeight;
-            let margin = 30;
-            
-            let perimeter = 2 * ((w - margin * 2) + (h - margin * 2));
-            let currentDist = p * perimeter;
+    });
 
-            let x = margin, y = margin;
-            let topLen = w - margin * 2;
-            let rightLen = h - margin * 2;
-            let bottomLen = w - margin * 2;
 
-            if (currentDist <= topLen) {
-                x = margin + currentDist;
-                y = margin;
-            } else if (currentDist <= topLen + rightLen) {
-                x = w - margin;
-                y = margin + (currentDist - topLen);
-            } else if (currentDist <= topLen + rightLen + bottomLen) {
-                x = (w - margin) - (currentDist - topLen - rightLen);
-                y = h - margin;
-            } else {
-                x = margin;
-                y = (h - margin) - (currentDist - topLen - rightLen - bottomLen);
-            }
+  document
+    .querySelectorAll(
+      '#t_telefono, #t_cct'
+    )
+    .forEach(function(input) {
 
-            return { x, y };
+      input.addEventListener(
+        'input',
+        function() {
+
+          this.value =
+            this.value
+              .replace(/\D/g,'')
+              .substring(
+                0,
+                Number(this.maxLength)
+              );
+
         }
+      );
 
-        function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+    });
 
-            progress += speed;
-            if (progress > 1) progress = 0;
+}
 
-            let target = getPerimeterPoint(progress);
-            points[0].x = target.x;
-            points[0].y = target.y;
 
-            let time = Date.now() * 0.003; // Ondulación más suave y lenta
+/* ============================================================
+   MODULO 1
+   LECTURA DEL EXCEL
+   ============================================================ */
 
-            for (let i = 1; i < numPoints; i++) {
-                let prev = points[i - 1];
-                let curr = points[i];
+function previewModulo1() {
 
-                let dx = prev.x - curr.x;
-                let dy = prev.y - curr.y;
-                let angle = Math.atan2(dy, dx);
-                let dist = Math.hypot(dx, dy);
-                let targetSpacing = 10;
+  const file =
+    document.getElementById(
+      'excelModulo1'
+    ).files[0];
 
-                if (dist > targetSpacing) {
-                    curr.x = prev.x - Math.cos(angle) * targetSpacing;
-                    curr.y = prev.y - Math.sin(angle) * targetSpacing;
-                }
 
-                let wave = Math.sin(time - i * 0.08) * (5 * (1 - i / numPoints));
-                curr.x += -Math.sin(angle) * wave;
-                curr.y += Math.cos(angle) * wave;
-            }
+  const preview =
+    document.getElementById(
+      'previewM1'
+    );
 
-            // Dibujar todo el cuerpo con plumas estilizadas (abanicos laterales a lo largo de cada segmento)
-            for (let i = points.length - 1; i > 0; i--) {
-                let p = points[i];
-                let ratio = 1 - (i / numPoints);
-                let size = Math.max(6, 32 * ratio);
 
-                let nextP = points[i - 1] || p;
-                let ang = Math.atan2(nextP.y - p.y, nextP.x - p.x);
+  const button =
+    document.getElementById(
+      'btnProcesarM1'
+    );
 
-                ctx.save();
-                ctx.translate(p.x, p.y);
-                ctx.rotate(ang);
 
-                // --- Plumas laterales (efecto de plumaje completo en todo el cuerpo) ---
-                ctx.fillStyle = '#cc2200'; // Puntas de pluma rojas características
-                ctx.beginPath();
-                ctx.moveTo(0, 0);
-                ctx.lineTo(-size * 0.8, -size * 1.2);
-                ctx.lineTo(-size * 0.3, 0);
-                ctx.lineTo(-size * 0.8, size * 1.2);
-                ctx.closePath();
-                ctx.fill();
+  if (!file) {
 
-                // Base de pluma principal en verde esmeralda brillante de quetzal
-                ctx.fillStyle = i % 2 === 0 ? '#00b050' : '#007a33';
-                ctx.beginPath();
-                ctx.ellipse(0, 0, size, size * 0.65, 0, 0, Math.PI * 2);
-                ctx.fill();
+    button.disabled = true;
 
-                // Detalle central dorado en cada pluma del cuerpo
-                ctx.fillStyle = '#ffd700';
-                ctx.beginPath();
-                ctx.ellipse(0, 0, size * 0.4, size * 0.25, 0, 0, Math.PI * 2);
-                ctx.fill();
+    return;
+  }
 
-                ctx.restore();
-            }
 
-            // Renderizado detallado de la cabeza mítica
-            let head = points[0];
-            let nextPoint = points[3];
-            let headAngle = Math.atan2(head.y - nextPoint.y, head.x - nextPoint.x);
+  const reader =
+    new FileReader();
 
-            ctx.save();
-            ctx.translate(head.x, head.y);
-            ctx.rotate(headAngle);
 
-            // Penacho trasero frondoso de plumas divinas
-            ctx.fillStyle = '#e60000';
-            ctx.beginPath();
-            ctx.moveTo(-5, 0);
-            ctx.lineTo(-45, -22);
-            ctx.lineTo(-25, -5);
-            ctx.lineTo(-55, 0);
-            ctx.lineTo(-25, 5);
-            ctx.lineTo(-45, 22);
-            ctx.closePath();
-            ctx.fill();
+  reader.onload = function(e) {
 
-            // Detalles dorados en el penacho
-            ctx.fillStyle = '#ffd700';
-            ctx.beginPath();
-            ctx.moveTo(-10, 0);
-            ctx.lineTo(-32, -12);
-            ctx.lineTo(-15, 0);
-            ctx.lineTo(-32, 12);
-            ctx.closePath();
-            ctx.fill();
+    try {
 
-            // Estructura de la cabeza de serpiente emplumada
-            ctx.fillStyle = '#003b1f';
-            ctx.strokeStyle = '#ffd700';
-            ctx.lineWidth = 2;
+      const workbook =
+        XLSX.read(
+          e.target.result,
+          {
+            type: 'array',
+            raw: false
+          }
+        );
 
-            ctx.beginPath();
-            ctx.moveTo(32, 0);
-            ctx.lineTo(14, -15);
-            ctx.lineTo(-15, -13);
-            ctx.lineTo(-24, 0);
-            ctx.lineTo(-15, 13);
-            ctx.lineTo(14, 15);
-            ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
 
-            // Cresta superior dorada
-            ctx.fillStyle = '#ffaa00';
-            ctx.beginPath();
-            ctx.moveTo(18, -9);
-            ctx.lineTo(6, -16);
-            ctx.lineTo(-2, -11);
-            ctx.fill();
+      const sheet =
+        workbook.Sheets[
+          workbook.SheetNames[0]
+        ];
 
-            // Ojos ardientes con brillo estelar
-            ctx.fillStyle = '#ff3300';
-            ctx.beginPath();
-            ctx.arc(11, -5, 4, 0, Math.PI * 2);
-            ctx.arc(11, 5, 4, 0, Math.PI * 2);
-            ctx.fill();
 
-            ctx.fillStyle = '#ffffff';
-            ctx.beginPath();
-            ctx.arc(12, -5, 1.5, 0, Math.PI * 2);
-            ctx.arc(12, 5, 1.5, 0, Math.PI * 2);
-            ctx.fill();
+      const rows =
+        XLSX.utils.sheet_to_json(
+          sheet,
+          {
+            header: 1,
+            defval: '',
+            raw: false
+          }
+        );
 
-            ctx.restore();
 
-            requestAnimationFrame(animate);
+      if (rows.length < 2) {
+
+        throw new Error(
+          'El Excel no contiene registros desde la fila 2.'
+        );
+      }
+
+
+      excelDataModulo1 =
+        rows
+          .slice(1)
+          .map(function(row) {
+
+            return [
+
+              row[0] ?? '',
+              row[1] ?? '',
+              row[2] ?? ''
+
+            ];
+
+          })
+          .filter(function(row) {
+
+            return String(row[0]).trim() !== '';
+
+          });
+
+
+      preview.innerHTML =
+        '<strong>' +
+        excelDataModulo1.length +
+        '</strong> registros detectados.';
+
+
+      preview.classList.remove('hidden');
+
+      button.disabled =
+        excelDataModulo1.length === 0;
+
+
+      document
+        .getElementById('statusM1')
+        .textContent =
+          'Archivo listo para procesar.';
+
+    } catch(error) {
+
+      button.disabled = true;
+
+      preview.classList.add('hidden');
+
+      document
+        .getElementById('statusM1')
+        .textContent =
+          'ERROR: ' +
+          error.message;
+    }
+
+  };
+
+
+  reader.readAsArrayBuffer(file);
+}
+
+
+/* ============================================================
+   MODULO 1
+   PROCESAR
+   ============================================================ */
+
+function procesarModulo1() {
+
+  if (!accessGranted) {
+
+    alert('Acceso no autorizado.');
+
+    return;
+  }
+
+
+  if (!excelDataModulo1) {
+
+    alert('Primero selecciona un Excel.');
+
+    return;
+  }
+
+
+  const button =
+    document.getElementById(
+      'btnProcesarM1'
+    );
+
+
+  button.disabled = true;
+
+  document
+    .getElementById('statusM1')
+    .textContent =
+      'Procesando. La búsqueda en BASE puede tardar debido al volumen de registros...';
+
+
+  google.script.run
+
+    .withSuccessHandler(function(result) {
+
+      button.disabled = false;
+
+
+      document
+        .getElementById('statusM1')
+        .innerHTML =
+          '<strong>PROCESO TERMINADO</strong><br>' +
+          'Registros Excel: ' +
+          result.uploaded +
+          '<br>' +
+          'Coincidencias: ' +
+          result.matched +
+          '<br>' +
+          'No encontrados: ' +
+          result.notFound +
+          '<br>' +
+          'Actualizados: ' +
+          result.updated +
+          '<br>' +
+          'Claves duplicadas en Excel: ' +
+          result.duplicateKeys;
+
+    })
+
+    .withFailureHandler(function(error) {
+
+      button.disabled = false;
+
+      document
+        .getElementById('statusM1')
+        .textContent =
+          'ERROR: ' +
+          error.message;
+
+    })
+
+    .processExcelToBase(
+      BASE_URL,
+      excelDataModulo1
+    );
+}
+
+
+/* ============================================================
+   MODULO 2
+   CAMBIO DE TIPO
+   ============================================================ */
+
+function cambiarTipoRegistroBase() {
+
+  const value =
+    document.getElementById(
+      'tipoRegistroBase'
+    ).value;
+
+
+  document
+    .getElementById('baseManual')
+    .classList.toggle(
+      'hidden',
+      value !== 'MANUAL'
+    );
+
+
+  document
+    .getElementById('baseExcel')
+    .classList.toggle(
+      'hidden',
+      value !== 'EXCEL'
+    );
+}
+
+
+/* ============================================================
+   MODULO 2
+   OBSERVACIONES
+   ============================================================ */
+
+function cambiarObs() {
+
+  const select =
+    document.getElementById(
+      'b_obsSelect'
+    );
+
+
+  const manual =
+    document.getElementById(
+      'b_obsManual'
+    );
+
+
+  manual.classList.toggle(
+    'hidden',
+    select.value !== 'MANUAL'
+  );
+
+
+  if (select.value !== 'MANUAL') {
+
+    manual.value = '';
+
+  }
+}
+
+
+/* ============================================================
+   MODULO 2
+   OBTENER REGISTRO DEL FORMULARIO
+   ============================================================ */
+
+function obtenerRegistroBaseFormulario() {
+
+  const obsSelect =
+    document.getElementById(
+      'b_obsSelect'
+    );
+
+
+  let obs =
+    obsSelect.value;
+
+
+  if (obs === 'MANUAL') {
+
+    obs =
+      document.getElementById(
+        'b_obsManual'
+      ).value;
+
+  }
+
+
+  return {
+
+    folio:
+      document.getElementById('b_folio').value,
+
+    idSare:
+      document.getElementById('b_idSare').value,
+
+    nombreSare:
+      document.getElementById('b_nombreSare').value,
+
+    municipio:
+      document.getElementById('b_municipio').value,
+
+    cct:
+      document.getElementById('b_cct').value,
+
+    nombreEscuela:
+      document.getElementById('b_nombreEscuela').value,
+
+    idBecarioFamilia:
+      document.getElementById('b_idBecario').value,
+
+    nombre:
+      document.getElementById('b_nombre').value,
+
+    primerApellido:
+      document.getElementById('b_primerApellido').value,
+
+    segundoApellido:
+      document.getElementById('b_segundoApellido').value,
+
+    remesa:
+      document.getElementById('b_remesa').value,
+
+    programa:
+      document.getElementById('b_programa').value,
+
+    bloque:
+      document.getElementById('b_bloque').value,
+
+    obs: obs,
+
+    mesRemesa:
+      document.getElementById('b_mesRemesa').value,
+
+    curp:
+      document.getElementById('b_curp').value,
+
+    estatus:
+      document.getElementById('b_estatus').value
+  };
+}
+
+
+/* ============================================================
+   MODULO 2
+   AGREGAR REGISTRO AL BLOQUE
+   ============================================================ */
+
+function agregarRegistroBase() {
+
+  const record =
+    obtenerRegistroBaseFormulario();
+
+
+  if (!record.folio.trim()) {
+
+    alert(
+      'El FOLIO es obligatorio.'
+    );
+
+    return;
+  }
+
+
+  if (
+    record.curp &&
+    record.curp.length > 18
+  ) {
+
+    alert(
+      'La CURP no puede superar 18 caracteres.'
+    );
+
+    return;
+  }
+
+
+  baseBlock.push(record);
+
+
+  actualizarTablaBloque();
+
+  limpiarFormularioBase();
+
+
+  document
+    .getElementById('b_folio')
+    .focus();
+}
+
+
+/* ============================================================
+   MODULO 2
+   TABLA DEL BLOQUE
+   ============================================================ */
+
+function actualizarTablaBloque() {
+
+  document
+    .getElementById('baseBlockCount')
+    .textContent =
+      baseBlock.length +
+      ' registros pendientes';
+
+
+  if (baseBlock.length === 0) {
+
+    document
+      .getElementById('baseBlockTable')
+      .innerHTML =
+        '<div style="padding:15px">' +
+        'No hay registros pendientes.' +
+        '</div>';
+
+    return;
+  }
+
+
+  let html =
+    '<table>' +
+    '<thead>' +
+    '<tr>' +
+    '<th>#</th>' +
+    '<th>FOLIO</th>' +
+    '<th>NOMBRE</th>' +
+    '<th>PROGRAMA</th>' +
+    '<th>CURP</th>' +
+    '<th>ACCIÓN</th>' +
+    '</tr>' +
+    '</thead>' +
+    '<tbody>';
+
+
+  baseBlock.forEach(function(record,index) {
+
+    html +=
+      '<tr>' +
+
+      '<td>' +
+      (index + 1) +
+      '</td>' +
+
+      '<td>' +
+      escapeHtml(record.folio) +
+      '</td>' +
+
+      '<td>' +
+      escapeHtml(
+        [
+          record.nombre,
+          record.primerApellido,
+          record.segundoApellido
+        ]
+        .filter(Boolean)
+        .join(' ')
+      ) +
+      '</td>' +
+
+      '<td>' +
+      escapeHtml(record.programa) +
+      '</td>' +
+
+      '<td>' +
+      escapeHtml(record.curp) +
+      '</td>' +
+
+      '<td>' +
+      '<button class="danger" ' +
+      'onclick="eliminarRegistroBloque(' +
+      index +
+      ')">' +
+      'ELIMINAR' +
+      '</button>' +
+      '</td>' +
+
+      '</tr>';
+  });
+
+
+  html +=
+    '</tbody></table>';
+
+
+  document
+    .getElementById('baseBlockTable')
+    .innerHTML =
+      html;
+}
+
+
+function eliminarRegistroBloque(index) {
+
+  baseBlock.splice(index,1);
+
+  actualizarTablaBloque();
+}
+
+
+function limpiarBloqueBase() {
+
+  if (baseBlock.length === 0) {
+    return;
+  }
+
+
+  if (
+    !confirm(
+      '¿Deseas eliminar todos los registros pendientes del bloque?'
+    )
+  ) {
+    return;
+  }
+
+
+  baseBlock = [];
+
+  actualizarTablaBloque();
+}
+
+
+/* ============================================================
+   MODULO 2
+   GUARDAR BLOQUE
+   ============================================================ */
+
+function guardarBloqueBase() {
+
+  if (!accessGranted) {
+
+    alert('Acceso no autorizado.');
+
+    return;
+  }
+
+
+  if (baseBlock.length === 0) {
+
+    alert(
+      'No hay registros en el bloque.'
+    );
+
+    return;
+  }
+
+
+  const status =
+    document.getElementById(
+      'baseBlockCount'
+    );
+
+
+  status.textContent =
+    'Guardando bloque...';
+
+
+  google.script.run
+
+    .withSuccessHandler(function(result) {
+
+      alert(
+        'Bloque guardado correctamente.\n\n' +
+        'Registros: ' +
+        result.count +
+        '\n' +
+        'Primera fila: ' +
+        result.firstRow +
+        '\n' +
+        'Última fila: ' +
+        result.lastRow
+      );
+
+
+      baseBlock = [];
+
+      actualizarTablaBloque();
+
+      limpiarFormularioBase();
+
+    })
+
+    .withFailureHandler(function(error) {
+
+      alert(
+        'ERROR:\n' +
+        error.message
+      );
+
+      actualizarTablaBloque();
+
+    })
+
+    .appendBaseRecords(
+      BASE_URL,
+      baseBlock
+    );
+}
+
+
+/* ============================================================
+   MODULO 2
+   LIMPIAR FORMULARIO BASE
+   ============================================================ */
+
+function limpiarFormularioBase() {
+
+  document
+    .querySelectorAll(
+      '#baseManual input, #baseManual select'
+    )
+    .forEach(function(element) {
+
+      if (
+        element.id ===
+        'b_obsSelect'
+      ) {
+
+        element.value = '';
+
+      } else {
+
+        element.value = '';
+
+      }
+
+    });
+
+
+  document
+    .getElementById(
+      'b_obsManual'
+    )
+    .classList.add('hidden');
+}
+
+
+/* ============================================================
+   MODULO 2
+   EXCEL
+   ============================================================ */
+
+function previewModulo2() {
+
+  const file =
+    document.getElementById(
+      'excelModulo2'
+    ).files[0];
+
+
+  const button =
+    document.getElementById(
+      'btnProcesarM2'
+    );
+
+
+  const preview =
+    document.getElementById(
+      'previewM2'
+    );
+
+
+  if (!file) {
+
+    button.disabled = true;
+
+    return;
+  }
+
+
+  const reader =
+    new FileReader();
+
+
+  reader.onload = function(e) {
+
+    try {
+
+      const workbook =
+        XLSX.read(
+          e.target.result,
+          {
+            type: 'array',
+            raw: false
+          }
+        );
+
+
+      const sheet =
+        workbook.Sheets[
+          workbook.SheetNames[0]
+        ];
+
+
+      const rows =
+        XLSX.utils.sheet_to_json(
+          sheet,
+          {
+            header: 1,
+            defval: '',
+            raw: false
+          }
+        );
+
+
+      if (rows.length < 2) {
+
+        throw new Error(
+          'El Excel debe tener encabezados y registros.'
+        );
+      }
+
+
+      const headers =
+        rows[0];
+
+
+      const dataRows =
+        rows.slice(1);
+
+
+      excelDataModulo2 = {
+
+        headers:
+          headers,
+
+        rows:
+          dataRows
+
+      };
+
+
+      preview.innerHTML =
+        '<strong>' +
+        dataRows.length +
+        '</strong> filas detectadas.<br><br>' +
+
+        '<strong>Encabezados:</strong><br>' +
+
+        headers
+          .map(function(h) {
+            return escapeHtml(h);
+          })
+          .join(' | ');
+
+
+      preview.classList.remove(
+        'hidden'
+      );
+
+
+      button.disabled = false;
+
+
+      document
+        .getElementById('statusM2')
+        .textContent =
+          'Archivo listo para cargar.';
+
+    } catch(error) {
+
+      button.disabled = true;
+
+      preview.classList.add(
+        'hidden'
+      );
+
+      document
+        .getElementById('statusM2')
+        .textContent =
+          'ERROR: ' +
+          error.message;
+    }
+
+  };
+
+
+  reader.readAsArrayBuffer(file);
+}
+
+
+/* ============================================================
+   MODULO 2
+   PROCESAR EXCEL
+   ============================================================ */
+
+function procesarModulo2() {
+
+  if (!excelDataModulo2) {
+
+    alert(
+      'Primero selecciona un Excel.'
+    );
+
+    return;
+  }
+
+
+  const button =
+    document.getElementById(
+      'btnProcesarM2'
+    );
+
+
+  button.disabled = true;
+
+
+  document
+    .getElementById('statusM2')
+    .textContent =
+      'Procesando y registrando información en BASE...';
+
+
+  google.script.run
+
+    .withSuccessHandler(function(result) {
+
+      button.disabled = false;
+
+
+      document
+        .getElementById('statusM2')
+        .innerHTML =
+          '<strong>CARGA TERMINADA</strong><br>' +
+          'Registros agregados: ' +
+          result.count +
+          '<br>' +
+          'Filas: ' +
+          result.firstRow +
+          ' a ' +
+          result.lastRow;
+
+    })
+
+    .withFailureHandler(function(error) {
+
+      button.disabled = false;
+
+
+      document
+        .getElementById('statusM2')
+        .textContent =
+          'ERROR: ' +
+          error.message;
+
+    })
+
+    .processBaseExcelMassive(
+      BASE_URL,
+      excelDataModulo2
+    );
+}
+
+
+/* ============================================================
+   MODULO 3
+   CAMBIO DE TIPO DE TRÁMITE
+   ============================================================ */
+
+function cambiarTramite() {
+
+  const tipo =
+    document.getElementById(
+      'tipoTramite'
+    ).value;
+
+
+  ocultarSeccionesTramite();
+
+
+  if (!tipo) {
+
+    document
+      .getElementById('statusM3')
+      .textContent =
+        'Selecciona el tipo de trámite.';
+
+    return;
+  }
+
+
+  if (
+    tipo ===
+    'CUT (CAMBIO DE UBICACION DE TARJETA)'
+  ) {
+
+    document
+      .getElementById('sectionCUT')
+      .classList.remove('hidden');
+
+  }
+
+
+  if (
+    tipo ===
+    'RVP=Renuncia Voluntaria al Programa'
+  ) {
+
+    document
+      .getElementById('sectionRVP')
+      .classList.remove('hidden');
+
+  }
+
+
+  if (
+    tipo ===
+      'RDC=Reimpresión o Duplicado de Contrato Bancario' ||
+    tipo ===
+      'RDT=Reposicion de Tarjeta (Robo o Extravío)'
+  ) {
+
+    document
+      .getElementById(
+        'folioUnicoSection'
+      )
+      .classList.remove('hidden');
+
+
+    cargarFoliosDisponibles();
+  }
+
+
+  if (
+    tipo ===
+    'RDT=Reposicion de Tarjeta (Robo o Extravío)'
+  ) {
+
+    document
+      .getElementById('sectionRDT')
+      .classList.remove('hidden');
+
+  }
+
+
+  if (
+    tipo ===
+    'CDT=Cambio de Tutor'
+  ) {
+
+    document
+      .getElementById('sectionCDT')
+      .classList.remove('hidden');
+
+  }
+
+
+  if (
+    tipo ===
+    'BDI=Baja de Integrante/ Registro'
+  ) {
+
+    document
+      .getElementById('sectionBDI')
+      .classList.remove('hidden');
+
+  }
+
+
+  document
+    .getElementById('statusM3')
+    .textContent =
+      'Formulario listo para captura.';
+}
+
+
+function ocultarSeccionesTramite() {
+
+  [
+    'sectionCUT',
+    'sectionRVP',
+    'sectionRDT',
+    'sectionCDT',
+    'sectionBDI',
+    'folioUnicoSection'
+  ]
+  .forEach(function(id) {
+
+    document
+      .getElementById(id)
+      .classList.add('hidden');
+
+  });
+}
+
+
+/* ============================================================
+   MODULO 3
+   FOLIOS
+   ============================================================ */
+
+function cargarFoliosDisponibles(currentFolio) {
+
+  if (!accessGranted) return;
+
+
+  google.script.run
+
+    .withSuccessHandler(function(list) {
+
+      const select =
+        document.getElementById(
+          't_folioUnico'
+        );
+
+
+      select.innerHTML =
+        '<option value="">SELECCIONAR</option>';
+
+
+      list.forEach(function(item) {
+
+        const option =
+          document.createElement('option');
+
+
+        option.value =
+          item.value;
+
+        option.textContent =
+          item.value;
+
+
+        select.appendChild(option);
+
+      });
+
+
+      if (currentFolio) {
+
+        select.value =
+          currentFolio;
+      }
+
+    })
+
+    .withFailureHandler(function(error) {
+
+      document
+        .getElementById(
+          't_folioUnico'
+        )
+        .innerHTML =
+          '<option value="">ERROR AL CARGAR FOLIOS</option>';
+
+    })
+
+    .getFoliosDisponibles(
+      BASE_URL,
+      currentFolio || ''
+    );
+}
+
+
+/* ============================================================
+   MODULO 3
+   OBTENER DATOS DEL FORMULARIO
+   ============================================================ */
+
+function obtenerTramiteFormulario() {
+
+  const tipo =
+    document.getElementById(
+      'tipoTramite'
+    ).value;
+
+
+  return {
+
+    tipoTramite: tipo,
+
+    sare:
+      document.getElementById('t_sare').value,
+
+    estatusFicha:
+      document.getElementById('t_estatusFicha').value,
+
+    cupoElabora:
+      document.getElementById('t_cupo').value,
+
+    fechaElaboracion:
+      document.getElementById('t_fechaElaboracion').value,
+
+    idFamiliaSolicitante:
+      document.getElementById('t_idFamilia').value,
+
+    nombreSolicitante:
+      document.getElementById('t_nombre').value,
+
+    primerApellidoSolicitante:
+      document.getElementById('t_primerApellido').value,
+
+    segundoApellidoSolicitante:
+      document.getElementById('t_segundoApellido').value,
+
+    curpSolicitante:
+      document.getElementById('t_curp').value,
+
+    telefonoSolicitante:
+      document.getElementById('t_telefono').value,
+
+    emailSolicitante:
+      document.getElementById('t_email').value,
+
+
+    folioUnico:
+      document.getElementById('t_folioUnico').value,
+
+
+    claveEstado:
+      document.getElementById('t_claveEstado').value,
+
+    nombreEstado:
+      document.getElementById('t_nombreEstado').value,
+
+    sareProcedencia:
+      document.getElementById('t_sareProcedencia').value,
+
+    cctTramite:
+      document.getElementById('t_cct').value,
+
+    nombreEscuelaTramite:
+      document.getElementById('t_escuela').value,
+
+    programaTramite:
+      document.getElementById('t_programa').value,
+
+
+    motivoRenuncia:
+      document.getElementById('t_motivo').value,
+
+
+    folioReporteBanco:
+      document.getElementById('t_folioBanco').value,
+
+
+    causalCambioTutor:
+      document.getElementById('t_causalTutor').value,
+
+    nombreTutorNuevo:
+      document.getElementById('t_nombreTutor').value,
+
+    primerApellidoTutorNuevo:
+      document.getElementById('t_apellidoTutor1').value,
+
+    segundoApellidoTutorNuevo:
+      document.getElementById('t_apellidoTutor2').value,
+
+    curpIntegranteBaja:
+      document.getElementById('t_curpTutor').value,
+
+    fechaValidacion:
+      document.getElementById(
+        't_fechaValidacionCDT'
+      ).value,
+
+    folioSibuebFormulario:
+      document.getElementById(
+        't_folioSibuebCDT'
+      ).value,
+
+
+    idIntegrante:
+      document.getElementById('t_idIntegrante').value,
+
+    nombreIntegranteBaja:
+      document.getElementById(
+        't_nombreIntegrante'
+      ).value,
+
+    primerApellidoIntegranteBaja:
+      document.getElementById(
+        't_apellidoIntegrante1'
+      ).value,
+
+    segundoApellidoIntegranteBaja:
+      document.getElementById(
+        't_apellidoIntegrante2'
+      ).value,
+
+    curpIntegranteBajaBDI:
+      document.getElementById(
+        't_curpIntegrante'
+      ).value,
+
+    folioSibuebBDI:
+      document.getElementById(
+        't_folioSibuebBDI'
+      ).value
+  };
+}
+
+
+/* ============================================================
+   MODULO 3
+   GUARDAR TRÁMITE
+   ============================================================ */
+
+function guardarTramite() {
+
+  if (!accessGranted) {
+
+    alert(
+      'No tienes autorización EDITOR.'
+    );
+
+    return;
+  }
+
+
+  const record =
+    obtenerTramiteFormulario();
+
+
+  if (!record.tipoTramite) {
+
+    alert(
+      'Selecciona el tipo de trámite.'
+    );
+
+    return;
+  }
+
+
+  if (
+    record.curpSolicitante.length > 18
+  ) {
+
+    alert(
+      'La CURP del solicitante no puede superar 18 caracteres.'
+    );
+
+    return;
+  }
+
+
+  if (
+    record.telefonoSolicitante &&
+    record.telefonoSolicitante.length !== 10
+  ) {
+
+    alert(
+      'El teléfono debe tener 10 dígitos.'
+    );
+
+    return;
+  }
+
+
+  google.script.run
+
+    .withSuccessHandler(function(result) {
+
+      document
+        .getElementById('statusM3')
+        .innerHTML =
+          '<strong>TRÁMITE GUARDADO CORRECTAMENTE.</strong> ' +
+          'Fila: ' +
+          result.row;
+
+
+      limpiarFormularioTramite();
+
+    })
+
+    .withFailureHandler(function(error) {
+
+      document
+        .getElementById('statusM3')
+        .textContent =
+          'ERROR: ' +
+          error.message;
+
+    })
+
+    .createTramite(
+      BASE_URL,
+      record
+    );
+}
+
+
+/* ============================================================
+   MODULO 3
+   LIMPIAR FORMULARIO
+   ============================================================ */
+
+function limpiarFormularioTramite() {
+
+  document
+    .querySelectorAll(
+      '#module3 input, #module3 textarea'
+    )
+    .forEach(function(element) {
+
+      element.value = '';
+
+    });
+
+
+  document
+    .querySelectorAll(
+      '#module3 select'
+    )
+    .forEach(function(element) {
+
+      element.selectedIndex = 0;
+
+    });
+
+
+  ocultarSeccionesTramite();
+
+
+  document
+    .getElementById('statusM3')
+    .textContent =
+      'Formulario limpio.';
+}
+
+
+/* ============================================================
+   MODULO 4
+   BUSCAR
+   ============================================================ */
+
+function buscarTramite() {
+
+  const type =
+    document.getElementById(
+      'searchType'
+    ).value;
+
+
+  const term =
+    document.getElementById(
+      'searchTerm'
+    ).value.trim();
+
+
+  if (!term) {
+
+    alert(
+      'Escribe el valor que deseas buscar.'
+    );
+
+    return;
+  }
+
+
+  document
+    .getElementById(
+      'searchResults'
+    )
+    .innerHTML =
+      '<div class="status">Buscando...</div>';
+
+
+  google.script.run
+
+    .withSuccessHandler(function(results) {
+
+      mostrarResultadosBusqueda(
+        results
+      );
+
+    })
+
+    .withFailureHandler(function(error) {
+
+      document
+        .getElementById(
+          'searchResults'
+        )
+        .innerHTML =
+          '<div class="status">ERROR: ' +
+          escapeHtml(error.message) +
+          '</div>';
+
+    })
+
+    .searchTramites(
+      BASE_URL,
+      type,
+      term
+    );
+}
+
+
+/* ============================================================
+   MODULO 4
+   MOSTRAR RESULTADOS
+   ============================================================ */
+
+function mostrarResultadosBusqueda(results) {
+
+  const container =
+    document.getElementById(
+      'searchResults'
+    );
+
+
+  if (!results || results.length === 0) {
+
+    container.innerHTML =
+      '<div class="status">' +
+      'No se encontraron registros.' +
+      '</div>';
+
+    return;
+  }
+
+
+  let html =
+    '<div class="small">' +
+    results.length +
+    ' resultado(s) encontrado(s).' +
+    '</div>';
+
+
+  results.forEach(function(item,index) {
+
+    html +=
+
+      '<div ' +
+
+      'class="record-card" ' +
+
+      'onclick="seleccionarResultado(' +
+      item.row +
+      ')"' +
+
+      '>' +
+
+      '<strong>RESULTADO ' +
+      (index + 1) +
+      '</strong><br>' +
+
+      'FILA: ' +
+      item.row +
+      '<br>' +
+
+      'FOLIO: ' +
+      escapeHtml(item.folio) +
+      '<br>' +
+
+      'CURP: ' +
+      escapeHtml(item.curp) +
+      '<br>' +
+
+      'SOLICITANTE: ' +
+      escapeHtml(item.nombre) +
+      '<br>' +
+
+      'TRÁMITE: ' +
+      escapeHtml(item.tramite) +
+
+      '</div>';
+  });
+
+
+  container.innerHTML =
+    html;
+}
+
+
+/* ============================================================
+   MODULO 4
+   SELECCIONAR REGISTRO
+   ============================================================ */
+
+function seleccionarResultado(row) {
+
+  document
+    .getElementById('editSection')
+    .classList.remove('hidden');
+
+
+  document
+    .getElementById('editSummary')
+    .textContent =
+      'Cargando registro de la fila ' +
+      row +
+      '...';
+
+
+  google.script.run
+
+    .withSuccessHandler(function(record) {
+
+      editingRecord =
+        record;
+
+
+      document
+        .getElementById('editRow')
+        .value =
+          row;
+
+
+      document
+        .getElementById('editSummary')
+        .innerHTML =
+          '<strong>FILA:</strong> ' +
+          row +
+          ' &nbsp; | &nbsp; ' +
+          '<strong>TRÁMITE:</strong> ' +
+          escapeHtml(
+            record.tipoTramite
+          );
+
+
+      construirFormularioEdicion(
+        record
+      );
+
+    })
+
+    .withFailureHandler(function(error) {
+
+      document
+        .getElementById('editSummary')
+        .textContent =
+          'ERROR: ' +
+          error.message;
+
+    })
+
+    .getTramiteRecord(
+      BASE_URL,
+      row
+    );
+}
+
+
+/* ============================================================
+   MODULO 4
+   CONSTRUIR FORMULARIO DE EDICIÓN
+   ============================================================ */
+
+function construirFormularioEdicion(record) {
+
+  const container =
+    document.getElementById(
+      'editFormContainer'
+    );
+
+
+  /*
+   * Creamos un formulario equivalente al módulo 3.
+   */
+
+  container.innerHTML = `
+
+    <div class="section">
+
+      <div class="section-title">
+        RESPONSABLE DE ATENCION
+      </div>
+
+      <div class="grid">
+
+        <div class="field">
+          <label>SARE</label>
+          <input id="e_sare"
+                 data-uppercase
+                 value="${esc(record.sare)}">
+        </div>
+
+        <div class="field">
+          <label>ESTATUS DE FICHA</label>
+          <select id="e_estatusFicha">
+            ${optionHtml([
+              'U=Utilizada',
+              'FB=Formato en Blanco',
+              'D=Dañada',
+              'C=Cancelada',
+              'E=Extraviada'
+            ],record.estatusFicha)}
+          </select>
+        </div>
+
+        <div class="field">
+          <label>CUPO DE QUIEN ELABORA</label>
+          <input id="e_cupo"
+                 data-uppercase
+                 value="${esc(record.cupoElabora)}">
+        </div>
+
+        <div class="field">
+          <label>FECHA DE ELABORACION</label>
+          <input id="e_fecha"
+                 type="date"
+                 value="${esc(record.fechaElaboracion)}">
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="section">
+
+      <div class="section-title">
+        DATOS DEL SOLICITANTE
+      </div>
+
+      <div class="grid">
+
+        <div class="field">
+          <label>ID FAMILIA SOLICITANTE</label>
+          <input id="e_idFamilia"
+                 value="${esc(record.idFamiliaSolicitante)}">
+        </div>
+
+        <div class="field">
+          <label>NOMBRE</label>
+          <input id="e_nombre"
+                 data-uppercase
+                 value="${esc(record.nombreSolicitante)}">
+        </div>
+
+        <div class="field">
+          <label>PRIMER APELLIDO</label>
+          <input id="e_apellido1"
+                 data-uppercase
+                 value="${esc(record.primerApellidoSolicitante)}">
+        </div>
+
+        <div class="field">
+          <label>SEGUNDO APELLIDO</label>
+          <input id="e_apellido2"
+                 data-uppercase
+                 value="${esc(record.segundoApellidoSolicitante)}">
+        </div>
+
+        <div class="field">
+          <label>CURP</label>
+          <input id="e_curp"
+                 maxlength="18"
+                 data-uppercase
+                 value="${esc(record.curpSolicitante)}">
+        </div>
+
+        <div class="field">
+          <label>TELEFONO</label>
+          <input id="e_telefono"
+                 maxlength="10"
+                 value="${esc(record.telefonoSolicitante)}">
+        </div>
+
+        <div class="field">
+          <label>CORREO ELECTRONICO</label>
+          <input id="e_email"
+                 data-uppercase
+                 value="${esc(record.emailSolicitante)}">
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="section">
+
+      <div class="section-title">
+        TIPO DE TRÁMITE
+      </div>
+
+      <div class="field">
+
+        <select id="e_tipo"
+                onchange="cambiarEdicionTramite()">
+
+          <option>
+            CUT (CAMBIO DE UBICACION DE TARJETA)
+          </option>
+
+          <option>
+            RVP=Renuncia Voluntaria al Programa
+          </option>
+
+          <option>
+            RDC=Reimpresión o Duplicado de Contrato Bancario
+          </option>
+
+          <option>
+            RDT=Reposicion de Tarjeta (Robo o Extravío)
+          </option>
+
+          <option>
+            CDT=Cambio de Tutor
+          </option>
+
+          <option>
+            BDI=Baja de Integrante/ Registro
+          </option>
+
+        </select>
+
+      </div>
+
+    </div>
+
+
+    <div id="e_specific"></div>
+
+  `;
+
+
+  document
+    .getElementById('e_tipo')
+    .value =
+      record.tipoTramite;
+
+
+  activarMayusculasEdicion();
+
+  cambiarEdicionTramite(record);
+}
+
+
+/* ============================================================
+   MODULO 4
+   FORMULARIO ESPECÍFICO DE EDICIÓN
+   ============================================================ */
+
+function cambiarEdicionTramite(record) {
+
+  const tipo =
+    document.getElementById(
+      'e_tipo'
+    ).value;
+
+
+  const data =
+    record ||
+    editingRecord ||
+    {};
+
+
+  const container =
+    document.getElementById(
+      'e_specific'
+    );
+
+
+  let html = '';
+
+
+  if (
+    tipo ===
+    'CUT (CAMBIO DE UBICACION DE TARJETA)'
+  ) {
+
+    html = `
+
+      <div class="section">
+
+        <div class="section-title">
+          CUT
+        </div>
+
+        <div class="grid">
+
+          <div class="field">
+            <label>CLAVE DEL ESTADO</label>
+            <input id="e_claveEstado"
+                   data-uppercase
+                   value="${esc(data.claveEstado)}">
+          </div>
+
+          <div class="field">
+            <label>NOMBRE DEL ESTADO</label>
+            <input id="e_nombreEstado"
+                   data-uppercase
+                   value="${esc(data.nombreEstado)}">
+          </div>
+
+          <div class="field">
+            <label>SARE DE PROCEDENCIA</label>
+            <select id="e_sareProcedencia">
+              ${optionHtml([
+                '1301','1302','1303',
+                '1304','1305','1306','1307'
+              ],data.sareProcedencia)}
+            </select>
+          </div>
+
+          <div class="field">
+            <label>C.C.T.</label>
+            <input id="e_cct"
+                   maxlength="10"
+                   value="${esc(data.cctTramite)}">
+          </div>
+
+          <div class="field">
+            <label>NOMBRE DE LA ESCUELA</label>
+            <input id="e_escuela"
+                   data-uppercase
+                   value="${esc(data.nombreEscuelaTramite)}">
+          </div>
+
+          <div class="field">
+            <label>PROGRAMA</label>
+            <select id="e_programa">
+              ${optionHtml([
+                'RC','BUEMS','JEF'
+              ],data.programaTramite)}
+            </select>
+          </div>
+
+        </div>
+
+      </div>
+
+    `;
+
+  }
+
+
+  else if (
+    tipo ===
+    'RVP=Renuncia Voluntaria al Programa'
+  ) {
+
+    html = `
+
+      <div class="section">
+
+        <div class="section-title">
+          RVP
+        </div>
+
+        <div class="field">
+
+          <label>MOTIVO DE LA RENUNCIA</label>
+
+          <textarea id="e_motivo"
+                    data-uppercase>
+            ${esc(data.motivoRenuncia)}
+          </textarea>
+
+        </div>
+
+      </div>
+
+    `;
+
+  }
+
+
+  else if (
+    tipo ===
+      'RDC=Reimpresión o Duplicado de Contrato Bancario' ||
+    tipo ===
+      'RDT=Reposicion de Tarjeta (Robo o Extravío)'
+  ) {
+
+    html = `
+
+      <div class="section">
+
+        <div class="section-title">
+          FOLIO UNICO
+        </div>
+
+        <select id="e_folioUnico">
+          <option value="">
+            CARGANDO...
+          </option>
+        </select>
+
+      </div>
+
+    `;
+
+
+    if (
+      tipo ===
+      'RDT=Reposicion de Tarjeta (Robo o Extravío)'
+    ) {
+
+      html += `
+
+        <div class="section">
+
+          <div class="field">
+
+            <label>
+              FOLIO DEL REPORTE ANTE EL BANCO
+            </label>
+
+            <input id="e_folioBanco"
+                   data-uppercase
+                   value="${esc(data.folioReporteBanco)}">
+
+          </div>
+
+        </div>
+
+      `;
+    }
+
+  }
+
+
+  else if (
+    tipo ===
+    'CDT=Cambio de Tutor'
+  ) {
+
+    html = `
+
+      <div class="section">
+
+        <div class="section-title">
+          CDT
+        </div>
+
+        <div class="grid">
+
+          <div class="field">
+            <label>CAUSAL DEL CAMBIO DE TUTOR</label>
+            <textarea id="e_causal"
+                      data-uppercase>${esc(data.causalCambioTutor)}</textarea>
+          </div>
+
+          <div class="field">
+            <label>NOMBRE</label>
+            <input id="e_tutorNombre"
+                   data-uppercase
+                   value="${esc(data.nombreTutorNuevo)}">
+          </div>
+
+          <div class="field">
+            <label>PRIMER APELLIDO</label>
+            <input id="e_tutorA1"
+                   data-uppercase
+                   value="${esc(data.primerApellidoTutorNuevo)}">
+          </div>
+
+          <div class="field">
+            <label>SEGUNDO APELLIDO</label>
+            <input id="e_tutorA2"
+                   data-uppercase
+                   value="${esc(data.segundoApellidoTutorNuevo)}">
+          </div>
+
+          <div class="field">
+            <label>CURP</label>
+            <input id="e_tutorCurp"
+                   maxlength="18"
+                   data-uppercase
+                   value="${esc(data.curpIntegranteBaja)}">
+          </div>
+
+          <div class="field">
+            <label>FECHA DE VALIDACION</label>
+            <input id="e_fechaValidacion"
+                   type="date"
+                   value="${esc(data.fechaValidacion)}">
+          </div>
+
+          <div class="field">
+            <label>FOLIO SIBUEB O FORMULARIO</label>
+            <input id="e_folioSibueb"
+                   data-uppercase
+                   value="${esc(data.folioSibuebFormulario)}">
+          </div>
+
+        </div>
+
+      </div>
+
+    `;
+
+  }
+
+
+  else if (
+    tipo ===
+    'BDI=Baja de Integrante/ Registro'
+  ) {
+
+    html = `
+
+      <div class="section">
+
+        <div class="section-title">
+          BDI
+        </div>
+
+        <div class="grid">
+
+          <div class="field">
+            <label>ID_INTEGRANTE</label>
+            <input id="e_idIntegrante"
+                   value="${esc(data.idIntegrante)}">
+          </div>
+
+          <div class="field">
+            <label>NOMBRE</label>
+            <input id="e_intNombre"
+                   data-uppercase
+                   value="${esc(data.nombreIntegranteBaja)}">
+          </div>
+
+          <div class="field">
+            <label>PRIMER APELLIDO</label>
+            <input id="e_intA1"
+                   data-uppercase
+                   value="${esc(data.primerApellidoIntegranteBaja)}">
+          </div>
+
+          <div class="field">
+            <label>SEGUNDO APELLIDO</label>
+            <input id="e_intA2"
+                   data-uppercase
+                   value="${esc(data.segundoApellidoIntegranteBaja)}">
+          </div>
+
+          <div class="field">
+            <label>CURP</label>
+            <input id="e_intCurp"
+                   maxlength="18"
+                   data-uppercase
+                   value="${esc(data.curpIntegranteBajaBDI || '')}">
+          </div>
+
+          <div class="field">
+            <label>FECHA DE VALIDACION</label>
+            <input id="e_fechaValidacion"
+                   type="date"
+                   value="${esc(data.fechaValidacion)}">
+          </div>
+
+          <div class="field">
+            <label>FOLIO SIBUEB O FORMULARIO</label>
+            <input id="e_folioSibueb"
+                   data-uppercase
+                   value="${esc(data.folioSibuebFormulario)}">
+          </div>
+
+        </div>
+
+      </div>
+
+    `;
+
+  }
+
+
+  container.innerHTML =
+    html;
+
+
+  activarMayusculasEdicion();
+
+
+  if (
+    tipo ===
+      'RDC=Reimpresión o Duplicado de Contrato Bancario' ||
+    tipo ===
+      'RDT=Reposicion de Tarjeta (Robo o Extravío)'
+  ) {
+
+    cargarFoliosEdicion(
+      data.folioUnico
+    );
+  }
+}
+
+
+/* ============================================================
+   MODULO 4
+   FOLIOS EDICIÓN
+   ============================================================ */
+
+function cargarFoliosEdicion(current) {
+
+  google.script.run
+
+    .withSuccessHandler(function(list) {
+
+      const select =
+        document.getElementById(
+          'e_folioUnico'
+        );
+
+
+      if (!select) return;
+
+
+      select.innerHTML =
+        '<option value="">SELECCIONAR</option>';
+
+
+      list.forEach(function(item) {
+
+        const option =
+          document.createElement(
+            'option'
+          );
+
+
+        option.value =
+          item.value;
+
+        option.textContent =
+          item.value;
+
+
+        select.appendChild(
+          option
+        );
+
+      });
+
+
+      select.value =
+        current || '';
+
+    })
+
+    .getFoliosDisponibles(
+      BASE_URL,
+      current || ''
+    );
+}
+
+
+/* ============================================================
+   MODULO 4
+   OBTENER FORMULARIO DE EDICIÓN
+   ============================================================ */
+
+function obtenerEdicion() {
+
+  const tipo =
+    document.getElementById(
+      'e_tipo'
+    ).value;
+
+
+  const data = {
+
+    tipoTramite: tipo,
+
+    sare:
+      document.getElementById('e_sare').value,
+
+    estatusFicha:
+      document.getElementById('e_estatusFicha').value,
+
+    cupoElabora:
+      document.getElementById('e_cupo').value,
+
+    fechaElaboracion:
+      document.getElementById('e_fecha').value,
+
+    idFamiliaSolicitante:
+      document.getElementById('e_idFamilia').value,
+
+    nombreSolicitante:
+      document.getElementById('e_nombre').value,
+
+    primerApellidoSolicitante:
+      document.getElementById('e_apellido1').value,
+
+    segundoApellidoSolicitante:
+      document.getElementById('e_apellido2').value,
+
+    curpSolicitante:
+      document.getElementById('e_curp').value,
+
+    telefonoSolicitante:
+      document.getElementById('e_telefono').value,
+
+    emailSolicitante:
+      document.getElementById('e_email').value
+  };
+
+
+  const folio =
+    document.getElementById(
+      'e_folioUnico'
+    );
+
+
+  if (folio) {
+
+    data.folioUnico =
+      folio.value;
+  }
+
+
+  if (
+    tipo ===
+    'CUT (CAMBIO DE UBICACION DE TARJETA)'
+  ) {
+
+    data.claveEstado =
+      document.getElementById(
+        'e_claveEstado'
+      ).value;
+
+    data.nombreEstado =
+      document.getElementById(
+        'e_nombreEstado'
+      ).value;
+
+    data.sareProcedencia =
+      document.getElementById(
+        'e_sareProcedencia'
+      ).value;
+
+    data.cctTramite =
+      document.getElementById(
+        'e_cct'
+      ).value;
+
+    data.nombreEscuelaTramite =
+      document.getElementById(
+        'e_escuela'
+      ).value;
+
+    data.programaTramite =
+      document.getElementById(
+        'e_programa'
+      ).value;
+  }
+
+
+  else if (
+    tipo ===
+    'RVP=Renuncia Voluntaria al Programa'
+  ) {
+
+    data.motivoRenuncia =
+      document.getElementById(
+        'e_motivo'
+      ).value;
+  }
+
+
+  else if (
+    tipo ===
+    'RDT=Reposicion de Tarjeta (Robo o Extravío)'
+  ) {
+
+    data.folioReporteBanco =
+      document.getElementById(
+        'e_folioBanco'
+      ).value;
+  }
+
+
+  else if (
+    tipo ===
+    'CDT=Cambio de Tutor'
+  ) {
+
+    data.causalCambioTutor =
+      document.getElementById(
+        'e_causal'
+      ).value;
+
+    data.nombreTutorNuevo =
+      document.getElementById(
+        'e_tutorNombre'
+      ).value;
+
+    data.primerApellidoTutorNuevo =
+      document.getElementById(
+        'e_tutorA1'
+      ).value;
+
+    data.segundoApellidoTutorNuevo =
+      document.getElementById(
+        'e_tutorA2'
+      ).value;
+
+    data.curpIntegranteBaja =
+      document.getElementById(
+        'e_tutorCurp'
+      ).value;
+
+    data.fechaValidacion =
+      document.getElementById(
+        'e_fechaValidacion'
+      ).value;
+
+    data.folioSibuebFormulario =
+      document.getElementById(
+        'e_folioSibueb'
+      ).value;
+  }
+
+
+  else if (
+    tipo ===
+    'BDI=Baja de Integrante/ Registro'
+  ) {
+
+    data.idIntegrante =
+      document.getElementById(
+        'e_idIntegrante'
+      ).value;
+
+    data.nombreIntegranteBaja =
+      document.getElementById(
+        'e_intNombre'
+      ).value;
+
+    data.primerApellidoIntegranteBaja =
+      document.getElementById(
+        'e_intA1'
+      ).value;
+
+    data.segundoApellidoIntegranteBaja =
+      document.getElementById(
+        'e_intA2'
+      ).value;
+
+    data.curpIntegranteBajaBDI =
+      document.getElementById(
+        'e_intCurp'
+      ).value;
+
+    data.fechaValidacion =
+      document.getElementById(
+        'e_fechaValidacion'
+      ).value;
+
+    data.folioSibuebFormulario =
+      document.getElementById(
+        'e_folioSibueb'
+      ).value;
+  }
+
+
+  return data;
+}
+
+
+/* ============================================================
+   MODULO 4
+   ACTUALIZAR
+   ============================================================ */
+
+function actualizarTramite() {
+
+  const row =
+    Number(
+      document.getElementById(
+        'editRow'
+      ).value
+    );
+
+
+  if (!row) {
+
+    alert(
+      'No hay un registro seleccionado.'
+    );
+
+    return;
+  }
+
+
+  const record =
+    obtenerEdicion();
+
+
+  google.script.run
+
+    .withSuccessHandler(function(result) {
+
+      document
+        .getElementById('statusM4')
+        .innerHTML =
+          '<strong>REGISTRO ACTUALIZADO.</strong> ' +
+          'Fila: ' +
+          result.row;
+
+      seleccionarResultado(row);
+
+    })
+
+    .withFailureHandler(function(error) {
+
+      document
+        .getElementById('statusM4')
+        .textContent =
+          'ERROR: ' +
+          error.message;
+
+    })
+
+    .updateTramite(
+      BASE_URL,
+      row,
+      record
+    );
+}
+
+
+/* ============================================================
+   FUNCIONES AUXILIARES HTML
+   ============================================================ */
+
+function escapeHtml(value) {
+
+  return String(
+    value === null ||
+    value === undefined
+      ? ''
+      : value
+  )
+  .replace(/&/g,'&amp;')
+  .replace(/</g,'&lt;')
+  .replace(/>/g,'&gt;')
+  .replace(/"/g,'&quot;')
+  .replace(/'/g,'&#039;');
+}
+
+
+function esc(value) {
+
+  return escapeHtml(value);
+}
+
+
+function optionHtml(options, selected) {
+
+  return options
+    .map(function(option) {
+
+      return (
+        '<option value="' +
+        escapeHtml(option) +
+        '"' +
+        (
+          String(option) ===
+          String(selected || '')
+            ? ' selected'
+            : ''
+        ) +
+        '>' +
+        escapeHtml(option) +
+        '</option>'
+      );
+
+    })
+    .join('');
+}
+
+
+function activarMayusculasEdicion() {
+
+  document
+    .querySelectorAll(
+      '#editFormContainer [data-uppercase]'
+    )
+    .forEach(function(input) {
+
+      input.addEventListener(
+        'input',
+        function() {
+
+          this.value =
+            this.value.toUpperCase();
+
         }
+      );
 
-        animate();
-    </script>
+    });
+}
+
+
+/* ============================================================
+   FIN DEL HTML
+   ============================================================ */
+
+</script>
+
 </body>
 </html>
+
+
+    
