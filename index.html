@@ -325,9 +325,15 @@ const Utils = {
     } else {
       input = document.createElement('input');
       input.type = campo.tipo === 'date' ? 'date' : (campo.tipo === 'email' ? 'email' : 'text');
-      if (campo.maxlength) {
+     if (campo.maxlength) {
         input.maxLength = campo.maxlength;
-        Utils.soloDigitos(input, campo.maxlength);
+        
+        // Aplica alfanumérico si es CURP, o solo dígitos si es teléfono/numérico
+        if (campo.id.includes('curp')) {
+          Utils.soloAlfanumerico(input, campo.maxlength);
+        } else if (campo.id.includes('telefono') || campo.tipo === 'number') {
+          Utils.soloDigitos(input, campo.maxlength);
+        }
       }
     }
     input.id = idPrefix + campo.id;
