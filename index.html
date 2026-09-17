@@ -218,49 +218,9 @@ const CONFIG = {
     { id:'telefono_sol', label:'Núm. de Teléfono (10 dígitos) Solicitante', col:'K', tipo:'text', maxlength:10 },
     { id:'correo_sol', label:'Correo Electrónico Solicitante', col:'L', tipo:'email' }
   ],
+  
   folioUnico: { col:'B' }, // Se usa solo para RDC y RDT
   tramites: {
-    CUT: {
-      nombre: 'CUT (Cambio de Ubicación de Tarjeta)',
-      colSeleccion: 'M',
-      valorSeleccion: 'CUT (CAMBIO DE UBICACION DE TARJETA)',
-      usaFolioUnico:false,
-      campos:[
-        { id:'cut_clave_estado', label:'Clave del Estado', col:'N', tipo:'text' },
-        { id:'cut_nombre_estado', label:'Nombre del Estado', col:'O', tipo:'text' },
-        { id:'cut_sare_procedencia', label:'SARE de Procedencia', col:'P', tipo:'select',
-          opciones:['1301','1302','1303','1304','1305','1306','1307'].map(v=>({v,t:v})) },
-        { id:'cut_cct', label:'C.C.T. (10 dígitos)', col:'Q', tipo:'text', maxlength:10 },
-        { id:'cut_nombre_escuela', label:'Nombre de la Escuela', col:'R', tipo:'text' },
-        { id:'cut_programa', label:'Programa', col:'S', tipo:'select',
-          opciones:[{v:'RC',t:'RC'},{v:'BUEMS',t:'BUEMS'},{v:'JEF',t:'JEF'}] }
-      ]
-    },
-    RVP: {
-      nombre: 'RVP (Renuncia Voluntaria al Programa)',
-      colSeleccion: 'T',
-      valorSeleccion: 'RVP=Renuncia Voluntaria al Programa',
-      usaFolioUnico:false,
-      campos:[
-        { id:'rvp_motivo', label:'Motivo de la Renuncia', col:'U', tipo:'text' }
-      ]
-    },
-    RDC: {
-      nombre: 'RDC (Reimpresión o Duplicado de Contrato Bancario)',
-      colSeleccion: 'V',
-      valorSeleccion: 'RDC=Reimpresión o Duplicado de Contrato Bancario',
-      usaFolioUnico:true,
-      campos:[]
-    },
-    RDT: {
-      nombre: 'RDT (Reposición de Tarjeta - Robo o Extravío)',
-      colSeleccion: 'W',
-      valorSeleccion: 'RDT=Reposicion de Tarjeta (Robo o Extravío)',
-      usaFolioUnico:true,
-      campos:[
-        { id:'rdt_folio_banco', label:'Núm. de Folio del Reporte ante el Banco de Bienestar', col:'X', tipo:'text' }
-      ]
-    },
     CDT: {
       nombre: 'CDT (Cambio de Tutor)',
       colSeleccion: 'Y',
