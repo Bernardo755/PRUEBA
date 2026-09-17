@@ -1,801 +1,606 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-  <meta charset="utf-8">
-  <title>App SARE</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <style>
-    /* ============================================================
-       ESTILOS GENERALES
-       ============================================================ */
-    :root{
-      --azul:#1a4d8f; --azul-osc:#0f3363; --gris:#f4f6f9; --borde:#d7dde5;
-      --ok:#1e8e3e; --err:#c62828; --texto:#22303f;
-    }
-    *{box-sizing:border-box;}
-    body{font-family:'Segoe UI',Arial,sans-serif;background:var(--gris);color:var(--texto);margin:0;padding:0;}
-    header{background:var(--azul-osc);color:#fff;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
-    header h1{font-size:18px;margin:0;}
-    header .info-usuario{font-size:12px;opacity:.85;}
-    .contenedor{max-width:980px;margin:0 auto;padding:16px;}
-    .caja{background:#fff;border:1px solid var(--borde);border-radius:8px;padding:18px;margin-bottom:16px;}
-    .oculto{display:none !important;}
-    h2{font-size:16px;color:var(--azul-osc);border-bottom:2px solid var(--azul);padding-bottom:6px;margin-top:0;}
-    h3{font-size:14px;color:var(--azul);margin:14px 0 8px;}
-    label{display:block;font-size:12px;font-weight:600;margin:8px 0 3px;}
-    input[type=text], input[type=email], input[type=date], input[type=number], input[type=url], select, textarea{
-      width:100%;padding:8px;border:1px solid var(--borde);border-radius:5px;font-size:13px;background:#fff;
-    }
-    input:focus, select:focus, textarea:focus{outline:2px solid var(--azul);}
-    .fila-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;}
-    button{cursor:pointer;border:none;border-radius:5px;padding:9px 16px;font-size:13px;font-weight:600;}
-    .btn-primario{background:var(--azul);color:#fff;}
-    .btn-primario:hover{background:var(--azul-osc);}
-    .btn-secundario{background:#e4e9f0;color:var(--texto);}
-    .btn-secundario:hover{background:#d5dce6;}
-    .btn-peligro{background:#fdecea;color:var(--err);}
-    .barra-modulos{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
-    .barra-modulos button{background:#fff;border:1px solid var(--borde);}
-    .barra-modulos button.activo{background:var(--azul);color:#fff;border-color:var(--azul);}
-    table{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px;}
-    th,td{border:1px solid var(--borde);padding:6px 8px;text-align:left;}
-    th{background:#eef2f8;}
-    .mensaje{padding:10px 12px;border-radius:5px;font-size:13px;margin-top:10px;}
-    .mensaje.ok{background:#e6f4ea;color:var(--ok);border:1px solid #b7dfc1;}
-    .mensaje.err{background:#fdecea;color:var(--err);border:1px solid #f3c1bd;}
-    .cargando{font-size:12px;color:#666;}
-    .acciones-final{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;}
-    small.ayuda{color:#667;display:block;margin-top:2px;}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trámites SARE</title>
+<style>
+  :root{
+    --azul:#0b5fa5; --azul-osc:#093f6e; --gris:#f4f6f8; --borde:#d6dde3;
+    --texto:#1f2a33; --rojo:#c0392b; --verde:#1e8449; --blanco:#ffffff;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:"Segoe UI",Arial,sans-serif; background:var(--gris); color:var(--texto);
+  }
+  header{
+    background:linear-gradient(90deg,var(--azul-osc),var(--azul)); color:#fff;
+    padding:18px 24px;
+  }
+  header h1{margin:0; font-size:20px;}
+  .tabs{
+    display:flex; background:var(--blanco); border-bottom:2px solid var(--borde);
+  }
+  .tab-btn{
+    flex:1; padding:14px; text-align:center; cursor:pointer; font-weight:600;
+    color:#5a6b78; border-bottom:3px solid transparent; user-select:none;
+  }
+  .tab-btn.activo{ color:var(--azul); border-bottom:3px solid var(--azul); }
+  .contenedor{ max-width:900px; margin:20px auto; padding:0 16px 60px; }
+  .modulo{ display:none; }
+  .modulo.activo{ display:block; }
+  .card{
+    background:#fff; border:1px solid var(--borde); border-radius:10px;
+    padding:20px; margin-bottom:18px;
+  }
+  .card h2{ margin-top:0; font-size:16px; color:var(--azul-osc); border-bottom:1px solid var(--borde); padding-bottom:8px;}
+  .grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media(max-width:640px){ .grid{ grid-template-columns:1fr; } }
+  .campo{ display:flex; flex-direction:column; gap:4px; }
+  .campo label{ font-size:13px; font-weight:600; color:#3a4652; }
+  .campo small{ color:#8091a0; font-weight:400; }
+  input, select{
+    padding:9px 10px; border:1px solid var(--borde); border-radius:6px; font-size:14px;
+    background:#fff; color:var(--texto);
+  }
+  input:focus, select:focus{ outline:2px solid var(--azul); border-color:var(--azul);}
+  .full{ grid-column:1 / -1; }
+  .btn{
+    background:var(--azul); color:#fff; border:none; padding:11px 20px; border-radius:6px;
+    font-weight:600; cursor:pointer; font-size:14px;
+  }
+  .btn:hover{ background:var(--azul-osc); }
+  .btn.secundario{ background:#6c7a89; }
+  .btn.secundario:hover{ background:#54606c; }
+  .acciones{ display:flex; gap:10px; margin-top:6px; }
+  .mensaje{ padding:10px 14px; border-radius:6px; font-size:14px; margin-bottom:14px; display:none;}
+  .mensaje.ok{ background:#eafaf1; color:var(--verde); border:1px solid #b7e8cb; display:block;}
+  .mensaje.error{ background:#fdecea; color:var(--rojo); border:1px solid #f5c1ba; display:block;}
+  .resultado-item{
+    padding:10px; border:1px solid var(--borde); border-radius:6px; margin-bottom:8px;
+    cursor:pointer; display:flex; justify-content:space-between; align-items:center;
+  }
+  .resultado-item:hover{ background:#f0f6fb; border-color:var(--azul); }
+  .tag{ font-size:11px; background:var(--azul); color:#fff; padding:3px 8px; border-radius:12px; }
+  .oculto{ display:none !important; }
+  .loading{ font-size:13px; color:#8091a0; }
+</style>
 </head>
 <body>
 
 <header>
-  <h1>Sistema SARE — Gestión de Tarjetas y Trámites</h1>
+  <h1>Trámites SARE — Cambios y Bajas</h1>
 </header>
+
+<div class="tabs">
+  <div class="tab-btn activo" data-modulo="modulo-captura">1. Registrar Trámite</div>
+  <div class="tab-btn" data-modulo="modulo-edicion">2. Buscar / Editar Trámite</div>
+</div>
 
 <div class="contenedor">
 
-  <!-- ============================================================
-       PANTALLA DE CARGA
-       -----------------------------------------------------------
-       Este HTML es un archivo INDEPENDIENTE: no lo sirve Apps Script.
-       La URL del script está fija en la constante SCRIPT_URL (ver el bloque
-       de código JavaScript al final del archivo) — no se pide nada al
-       usuario. Ya no hay validación de usuario/acceso, todo el que abra
-       esta página puede usar los módulos.
-       ============================================================ -->
-  <div class="caja" id="cajaCargando">
-    <h2>Cargando…</h2>
-    <p style="font-size:13px;">Configurando el sistema, un momento.</p>
-    <div id="mensajeAcceso"></div>
+  <!-- =============================================================================
+       MODULO 1: CAPTURA DE NUEVO TRAMITE
+  ============================================================================== -->
+  <div id="modulo-captura" class="modulo activo">
+    <div id="msg-captura" class="mensaje"></div>
+
+    <div class="card">
+      <h2>Responsable y Ficha</h2>
+      <div class="grid" id="bloque-comun"></div>
+    </div>
+
+    <div class="card">
+      <h2>Datos del Solicitante</h2>
+      <div class="grid" id="bloque-solicitante"></div>
+    </div>
+
+    <div class="card">
+      <h2>Tipo de Trámite</h2>
+      <div class="campo full">
+        <label>Selecciona el trámite</label>
+        <select id="select-tramite">
+          <option value="">-- Selecciona una opción --</option>
+          <option value="CUT">CUT (Cambio de Ubicación de Tarjeta)</option>
+          <option value="RVP">RVP (Renuncia Voluntaria al Programa)</option>
+          <option value="RDC">RDC (Reimpresión o Duplicado de Contrato Bancario)</option>
+          <option value="RDT">RDT (Reposición de Tarjeta - Robo o Extravío)</option>
+          <option value="CDT">CDT (Cambio de Tutor)</option>
+          <option value="BDI">BDI (Baja de Integrante/Registro)</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="bloque-folio-unico" class="card oculto">
+      <h2>Folio Único</h2>
+      <div class="campo full">
+        <label>Folio disponible</label>
+        <select id="select-folio-unico"><option value="">Cargando folios...</option></select>
+      </div>
+    </div>
+
+    <div id="bloque-dinamico"></div>
+
+    <div class="acciones">
+      <button class="btn" id="btn-guardar-captura">Guardar Trámite</button>
+      <button class="btn secundario" id="btn-limpiar-captura" type="button">Limpiar</button>
+    </div>
   </div>
 
-  <!-- ============================================================
-       APP PRINCIPAL (oculta hasta validar acceso EDITOR)
-       ============================================================ -->
-  <div id="appPrincipal" class="oculto">
+  <!-- =============================================================================
+       MODULO 2: EDICION / BUSQUEDA DE TRAMITES
+  ============================================================================== -->
+  <div id="modulo-edicion" class="modulo">
+    <div id="msg-edicion" class="mensaje"></div>
 
-    <div class="barra-modulos">
-      <button id="tabBtn1" class="activo" onclick="mostrarModulo(1)">Módulo 1: Actualización masiva</button>
-      <button id="tabBtn2" onclick="mostrarModulo(2)">Módulo 2: Registro de tarjetas</button>
-      <button id="tabBtn3" onclick="mostrarModulo(3)">Módulo 3: Trámites</button>
-      <button id="tabBtn4" onclick="mostrarModulo(4)">Módulo 4: Buscar / Editar trámite</button>
-    </div>
-
-    <!-- =========================================================
-         MÓDULO 1
-         ========================================================= -->
-    <div id="modulo1" class="caja">
-      <h2>Módulo 1 — Actualización masiva desde Excel (hoja BASE)</h2>
-      <p style="font-size:13px;">
-        Sube un Excel cuyas columnas A, B y C (desde la fila 2) contengan:
-        <b>A</b> = valor a buscar en la columna A de BASE, <b>B</b> = nuevo valor para la columna S (ESTATUS),
-        <b>C</b> = nuevo valor para la columna P (OBS). No se modifica nada más.
-      </p>
-      <input type="file" id="archivoModulo1" accept=".xlsx,.xls">
-      <div class="acciones-final">
-        <button class="btn-primario" onclick="procesarModulo1()">Procesar y actualizar BASE</button>
-      </div>
-      <div id="resultadoModulo1"></div>
-    </div>
-
-    <!-- =========================================================
-         MÓDULO 2
-         ========================================================= -->
-    <div id="modulo2" class="caja oculto">
-      <h2>Módulo 2 — Registro de tarjetas nuevas / de otros estados</h2>
-      <label>¿Cómo deseas cargar la información?</label>
-      <select id="selectorModo2" onchange="cambiarModoModulo2()">
-        <option value="formulario">1) Registrar manualmente (formulario)</option>
-        <option value="excel">2) Cargar desde Excel</option>
-      </select>
-
-      <!-- 2.1 FORMULARIO MANUAL — un solo formulario; cada "Agregar" lo suma a la
-           lista de abajo (tabla de confirmación) y limpia los campos para el
-           siguiente registro. El envío real se hace desde esa lista. -->
-      <div id="modo2Formulario">
-        <div class="fila-grid">
-          <div><label>Folio</label><input type="text" id="m2_folio"></div>
-          <div><label>ID SARE</label><input type="text" id="m2_idSare"></div>
-          <div><label>Nombre SARE</label><input type="text" id="m2_nombreSare"></div>
-          <div><label>Municipio</label><input type="text" id="m2_municipio"></div>
-          <div><label>CCT</label><input type="text" id="m2_cct"></div>
-          <div><label>Nombre de la escuela</label><input type="text" id="m2_escuela"></div>
-          <div><label>ID del becario/familia</label><input type="text" id="m2_idBecario"></div>
-          <div><label>Nombre del becario/tutor</label><input type="text" id="m2_nombreBecario"></div>
-          <div><label>Primer apellido</label><input type="text" id="m2_apellido1"></div>
-          <div><label>Segundo apellido</label><input type="text" id="m2_apellido2"></div>
-          <div><label>Remesa</label><input type="text" id="m2_remesa"></div>
-          <div>
-            <label>Programa</label>
-            <select id="m2_programa">
-              <option value="">Selecciona...</option><option>BASICA</option><option>BUEMS</option><option>JEF</option>
-            </select>
-          </div>
-          <div><label>Bloque</label><input type="text" id="m2_bloque"></div>
-          <div>
-            <label>OBS</label>
-            <select id="m2_obs">
-              <option value="">Selecciona o escribe abajo...</option>
-              <option>RECIBIDA DE OTRO ESTADO</option><option>NUEVA REMESA RECIBIDA</option>
-            </select>
-            <input type="text" placeholder="...o escribe un texto libre" id="m2_obsLibre" style="margin-top:4px;">
-          </div>
-          <div><label>Mes de remesa</label><input type="text" id="m2_mesRemesa"></div>
-          <div><label>CURP correcta (18)</label><input type="text" maxlength="18" id="m2_curp"></div>
-          <div>
-            <label>Estatus</label>
-            <select id="m2_estatus">
-              <option value="">Selecciona...</option>
-              <option>PERTENECE A LA SARE 1301</option><option>PERTENECE A LA SARE 1302</option>
-              <option>PERTENECE A LA SARE 1303</option><option>PERTENECE A LA SARE 1304</option>
-              <option>PERTENECE A LA SARE 1305</option><option>PERTENECE A LA SARE 1306</option>
-              <option>PERTENECE A LA SARE 1307</option>
-            </select>
-          </div>
-        </div>
-        <div class="acciones-final">
-          <button class="btn-secundario" onclick="agregarRegistroModulo2()">+ Agregar registro al bloque</button>
-        </div>
-
-        <h3>Registros listos para enviar (<span id="contadorRegistrosM2">0</span>)</h3>
-        <div id="tablaRegistrosModulo2"><p style="font-size:12px;color:#667;">Aún no has agregado ningún registro.</p></div>
-        <div class="acciones-final">
-          <button class="btn-primario" onclick="enviarBloqueModulo2()">Enviar bloque completo a BASE</button>
-        </div>
-      </div>
-
-      <!-- 2.2 CARGA POR EXCEL -->
-      <div id="modo2Excel" class="oculto">
-        <p style="font-size:13px;">
-          El Excel debe tener, en este orden de columnas (desde la fila 2): FOLIO, ID SARE, NOMBRE SARE, MUNICIPIO, CCT,
-          NOMBRE ESCUELA, ID BECARIO, NOMBRE BECARIO, PRIMER APELLIDO, SEGUNDO APELLIDO, REMESA, PROGRAMA, BLOQUE, OBS,
-          MES DE REMESA, CURP, ESTATUS.
-        </p>
-        <input type="file" id="archivoModulo2" accept=".xlsx,.xls">
-        <div class="acciones-final">
-          <button class="btn-primario" onclick="procesarExcelModulo2()">Cargar y enviar a BASE</button>
-        </div>
-      </div>
-
-      <div id="resultadoModulo2"></div>
-    </div>
-
-    <!-- =========================================================
-         MÓDULO 3
-         ========================================================= -->
-    <div id="modulo3" class="caja oculto">
-      <h2>Módulo 3 — Trámites</h2>
-
-      <h3>Responsable de atención</h3>
-      <div class="fila-grid">
-        <div>
-          <label>Estatus de ficha</label>
-          <select id="t3_estatusFicha">
-            <option value="">Selecciona...</option>
-            <option value="U">U = Utilizada</option>
-            <option value="FB">FB = Formato en Blanco</option>
-            <option value="D">D = Dañada</option>
-            <option value="C">C = Cancelada</option>
-            <option value="E">E = Extraviada</option>
-          </select>
-        </div>
-        <div>
-          <label>SARE</label>
-          <input type="text" id="t3_sare">
-        </div>
-        <div>
-          <label>Cupo de quien elabora</label>
-          <input type="text" id="t3_cupoElabora">
-        </div>
-        <div>
-          <label>Fecha de elaboración</label>
-          <input type="date" id="t3_fechaElaboracion">
-        </div>
-      </div>
-
-      <h3>Datos del solicitante</h3>
-      <div class="fila-grid">
-        <div><label>ID Familia solicitante</label><input type="text" id="t3_idFamiliaSol"></div>
-        <div><label>Nombre solicitante</label><input type="text" id="t3_nombreSol"></div>
-        <div><label>Primer apellido solicitante</label><input type="text" id="t3_apellido1Sol"></div>
-        <div><label>Segundo apellido solicitante</label><input type="text" id="t3_apellido2Sol"></div>
-        <div>
-          <label>CURP solicitante (18 dígitos)</label>
-          <input type="text" id="t3_curpSol" maxlength="18">
-        </div>
-        <div>
-          <label>Teléfono solicitante (10 dígitos)</label>
-          <input type="text" id="t3_telSol" maxlength="10">
-        </div>
-        <div><label>Correo electrónico solicitante</label><input type="email" id="t3_correoSol"></div>
-      </div>
-
-      <h3>Tipo de trámite</h3>
-      <select id="t3_tipo" onchange="cambiarTipoTramite()">
-        <option value="">Selecciona una opción...</option>
-        <option value="CUT">1) CUT (Cambio de Ubicación de Tarjeta)</option>
-        <option value="RVP">2) RVP = Renuncia Voluntaria al Programa</option>
-        <option value="RDC">3) RDC = Reimpresión o Duplicado de Contrato Bancario</option>
-        <option value="RDT">4) RDT = Reposición de Tarjeta (Robo o Extravío)</option>
-        <option value="CDT">5) CDT = Cambio de Tutor</option>
-        <option value="BDI">6) BDI = Baja de Integrante / Registro</option>
-      </select>
-
-      <!-- FOLIO ÚNICO: solo para RDC y RDT -->
-      <div id="bloqueFolioUnico" class="oculto">
-        <label>Folio único (disponible)</label>
-        <select id="t3_folioUnico"></select>
-        <small class="ayuda">Solo se listan los folios marcados como DISPONIBLE en la hoja FOLIOS.</small>
-      </div>
-
-      <!-- ---- CUT ---- -->
-      <div id="camposCUT" class="oculto">
-        <h3>Datos CUT</h3>
-        <div class="fila-grid">
-          <div><label>Clave del estado</label><input type="text" id="cut_claveEstado"></div>
-          <div><label>Nombre del estado</label><input type="text" id="cut_nombreEstado"></div>
-          <div>
-            <label>SARE de procedencia</label>
-            <select id="cut_sareProcedencia">
-              <option value="">Selecciona...</option>
-              <option>1301</option><option>1302</option><option>1303</option>
-              <option>1304</option><option>1305</option><option>1306</option><option>1307</option>
-            </select>
-          </div>
-          <div><label>C.C.T. (10 dígitos)</label><input type="text" id="cut_cct" maxlength="10"></div>
-          <div><label>Nombre de la escuela</label><input type="text" id="cut_escuela"></div>
-          <div>
-            <label>Programa</label>
-            <select id="cut_programa">
-              <option value="">Selecciona...</option>
-              <option>RC</option><option>BUEMS</option><option>JEF</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <!-- ---- RVP ---- -->
-      <div id="camposRVP" class="oculto">
-        <h3>Datos RVP</h3>
-        <label>Motivo de la renuncia</label>
-        <textarea id="rvp_motivo" rows="3"></textarea>
-      </div>
-
-      <!-- ---- RDC ---- (solo usa el folio único común, sin campos extra) -->
-      <div id="camposRDC" class="oculto">
-        <h3>Datos RDC</h3>
-        <p style="font-size:12px;color:#667;">Este trámite solo requiere el folio único seleccionado arriba.</p>
-      </div>
-
-      <!-- ---- RDT ---- -->
-      <div id="camposRDT" class="oculto">
-        <h3>Datos RDT</h3>
-        <label>Núm. de folio del reporte ante el Banco de Bienestar</label>
-        <input type="text" id="rdt_folioBanco">
-      </div>
-
-      <!-- ---- CDT ---- -->
-      <div id="camposCDT" class="oculto">
-        <h3>Datos CDT — Nuevo tutor</h3>
-        <div class="fila-grid">
-          <div><label>Causal del cambio de tutor</label><input type="text" id="cdt_causal"></div>
-          <div><label>Nombre</label><input type="text" id="cdt_nombre"></div>
-          <div><label>Primer apellido</label><input type="text" id="cdt_apellido1"></div>
-          <div><label>Segundo apellido</label><input type="text" id="cdt_apellido2"></div>
-          <div><label>CURP (18 dígitos)</label><input type="text" id="cdt_curp" maxlength="18"></div>
-          <div><label>Fecha de validación</label><input type="date" id="cdt_fechaValidacion"></div>
-          <div><label>Folio SIBUEB o formulario</label><input type="text" id="cdt_folioSibueb"></div>
-        </div>
-      </div>
-
-      <!-- ---- BDI ---- -->
-      <div id="camposBDI" class="oculto">
-        <h3>Datos BDI — Integrante a dar de baja</h3>
-        <div class="fila-grid">
-          <div><label>ID integrante (de quien se solicita la baja)</label><input type="text" id="bdi_idIntegrante"></div>
-          <div><label>Nombre integrante</label><input type="text" id="bdi_nombre"></div>
-          <div><label>Primer apellido integrante</label><input type="text" id="bdi_apellido1"></div>
-          <div><label>Segundo apellido integrante</label><input type="text" id="bdi_apellido2"></div>
-          <div><label>CURP integrante (18 dígitos)</label><input type="text" id="bdi_curp" maxlength="18"></div>
-          <div><label>Fecha de validación</label><input type="date" id="bdi_fechaValidacion"></div>
-          <div><label>Folio SIBUEB o formulario</label><input type="text" id="bdi_folioSibueb"></div>
-        </div>
-      </div>
-
-      <div class="acciones-final">
-        <button class="btn-primario" onclick="guardarTramite()">Guardar trámite</button>
-      </div>
-      <div id="resultadoModulo3"></div>
-    </div>
-
-    <!-- =========================================================
-         MÓDULO 4
-         ========================================================= -->
-    <div id="modulo4" class="caja oculto">
-      <h2>Módulo 4 — Buscar / Editar trámite</h2>
-      <div class="fila-grid">
-        <div>
+    <div class="card">
+      <h2>Buscar Trámite</h2>
+      <div class="grid">
+        <div class="campo">
           <label>Buscar por</label>
-          <select id="t4_criterio">
-            <option value="folio">Folio único</option>
-            <option value="curp">CURP del solicitante</option>
+          <select id="select-buscar-por">
+            <option value="folio">Folio</option>
+            <option value="curp">CURP del Solicitante</option>
           </select>
         </div>
-        <div>
+        <div class="campo">
           <label>Valor a buscar</label>
-          <input type="text" id="t4_valorBusqueda">
-        </div>
-        <div style="display:flex;align-items:flex-end;">
-          <button class="btn-primario" onclick="buscarTramiteModulo4()">Buscar</button>
+          <input type="text" id="input-buscar-valor" placeholder="Escribe el folio o CURP">
         </div>
       </div>
-      <div id="resultadosBusqueda4"></div>
-
-      <!-- El formulario de edición reutiliza los mismos IDs que el módulo 3
-           mediante un prefijo "e_" generado dinámicamente en JS -->
-      <div id="formularioEdicion4" class="oculto"></div>
+      <div class="acciones"><button class="btn" id="btn-buscar">Buscar</button></div>
     </div>
 
+    <div class="card oculto" id="card-resultados">
+      <h2>Resultados</h2>
+      <div id="lista-resultados"></div>
+    </div>
+
+    <div id="form-edicion-wrapper" class="oculto">
+      <div class="card">
+        <h2>Responsable y Ficha</h2>
+        <div class="grid" id="bloque-comun-edit"></div>
+      </div>
+      <div class="card">
+        <h2>Datos del Solicitante</h2>
+        <div class="grid" id="bloque-solicitante-edit"></div>
+      </div>
+      <div id="bloque-folio-unico-edit" class="card oculto">
+        <h2>Folio Único</h2>
+        <div class="campo full">
+          <label>Folio Único registrado</label>
+          <input type="text" id="input-folio-unico-edit" readonly>
+        </div>
+      </div>
+      <div id="bloque-dinamico-edit"></div>
+      <div class="acciones">
+        <button class="btn" id="btn-guardar-edicion">Actualizar Trámite</button>
+      </div>
+    </div>
   </div>
+
 </div>
 
 <script>
-/* ==================================================================================
-   ESTADO GLOBAL
-   ================================================================================== */
-// ===================================================================================
-// >>> PEGA AQUÍ LA URL DE IMPLEMENTACIÓN DEL SCRIPT (Implementar > Aplicación web) <<<
-// Ejemplo: 'https://script.google.com/macros/s/AKfycb.../exec'
-// ===================================================================================
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzBzY22iwQQZ6FQrlWP0vJarlsE6Lt2CItmPceqeGnGxWurifnL-EYJIfB6-rAS-XQk/exec';
+/* =======================================================================================
+   MODULO: CONFIGURACION GENERAL
+   -----------------------------------------------------------------------------------
+   Aquí se define la URL del Apps Script (backend) conectado al libro de Google Sheets.
+   Esta URL NO se pide al usuario en pantalla: se configura directamente en este código,
+   tal como se solicitó. Debe ser la URL de "Implementación > Aplicación web" del script
+   Code.gs (termina en /exec).
+======================================================================================= */
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyUAMDWhiY2Gy3h8hfhOz_8-kbT7VNGg6MZloQL5l12LAdvokm4dUzVVgx4ff4bVHbt/exec";
 
-/* ==================================================================================
-   CONEXIÓN CON EL SCRIPT (reemplaza a google.script.run, ya que este HTML es
-   un archivo independiente que no es servido por Apps Script)
-   -----------------------------------------------------------------------------
-   Se usa fetch() con Content-Type "text/plain" a propósito: así el navegador
-   NO envía una petición previa OPTIONS (preflight) que Apps Script no sabe
-   responder, evitando errores de CORS.
-   ================================================================================== */
-function llamarApi(accion, args) {
-  if (!SCRIPT_URL || SCRIPT_URL.indexOf('PEGA_AQUI') !== -1) {
-    return Promise.reject(new Error('Falta configurar SCRIPT_URL en index.html con la URL real del script.'));
-  }
-  return fetch(SCRIPT_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({ accion: accion, args: args || [] })
-  })
-    .then(function (resp) {
-      if (!resp.ok) throw new Error('Error HTTP ' + resp.status + ' al contactar el script.');
-      return resp.json();
-    })
-    .then(function (data) {
-      if (!data.ok) throw new Error(data.error || 'Error desconocido del script.');
-      return data.resultado;
-    });
-}
-
-/* ==================================================================================
-   ARRANQUE (ya no hay validación de usuario/acceso: se omitió a petición)
-   ================================================================================== */
-function iniciarApp() {
-  if (!SCRIPT_URL || SCRIPT_URL.indexOf('PEGA_AQUI') !== -1) {
-    mostrarMensaje('mensajeAcceso', 'Falta configurar SCRIPT_URL en el HTML con la URL real del script (Implementar > Aplicación web).', 'err');
-    return;
-  }
-  document.getElementById('cajaCargando').classList.add('oculto');
-  document.getElementById('appPrincipal').classList.remove('oculto');
-  cargarFoliosDisponibles();
-}
-
-window.addEventListener('load', iniciarApp);
-
-/* ==================================================================================
-   NAVEGACIÓN ENTRE MÓDULOS
-   ================================================================================== */
-function mostrarModulo(n) {
-  [1, 2, 3, 4].forEach(function (i) {
-    document.getElementById('modulo' + i).classList.toggle('oculto', i !== n);
-    document.getElementById('tabBtn' + i).classList.toggle('activo', i === n);
-  });
-}
-
-/* ==================================================================================
-   UTILIDADES DE UI
-   ================================================================================== */
-function mostrarMensaje(idContenedor, texto, tipo) {
-  document.getElementById(idContenedor).innerHTML = '<div class="mensaje ' + tipo + '">' + texto + '</div>';
-}
-
-function leerExcel(archivoInput, callback) {
-  const archivo = archivoInput.files[0];
-  if (!archivo) { alert('Selecciona un archivo primero.'); return; }
-  const lector = new FileReader();
-  lector.onload = function (e) {
-    const datos = new Uint8Array(e.target.result);
-    const libro = XLSX.read(datos, { type: 'array' });
-    const hoja = libro.Sheets[libro.SheetNames[0]];
-    // header:1 => matriz de filas/columnas cruda, respetando la posición A,B,C...
-    const filas = XLSX.utils.sheet_to_json(hoja, { header: 1, defval: '' });
-    callback(filas);
-  };
-  lector.readAsArrayBuffer(archivo);
-}
-
-/* ==================================================================================
-   MÓDULO 1 — ACTUALIZACIÓN MASIVA
-   ================================================================================== */
-function procesarModulo1() {
-  const input = document.getElementById('archivoModulo1');
-  mostrarMensaje('resultadoModulo1', 'Leyendo archivo...', 'ok');
-
-  leerExcel(input, function (filas) {
-    // filas[0] = encabezados; los datos inician en la fila índice 1 (fila 2 del excel)
-    const datos = [];
-    for (let i = 1; i < filas.length; i++) {
-      const r = filas[i];
-      if (!r || (r[0] === '' && r[1] === '' && r[2] === '')) continue;
-      datos.push({ clave: r[0], estatus: r[1], obs: r[2] });
+/* =======================================================================================
+   MODULO: CONFIG.columns
+   -----------------------------------------------------------------------------------
+   Mapeo de campos -> columna en la hoja TRAMITES. Debe coincidir EXACTAMENTE con el
+   objeto COL del archivo Code.gs. Si necesitas mover una columna, cámbiala aquí Y allá.
+======================================================================================= */
+const CONFIG = {
+  comunes: [
+    { id:'responsable', label:'Responsable de Atención SARE', col:'A', tipo:'text' },
+    { id:'estatus_ficha', label:'Estatus de Ficha', col:'C', tipo:'select',
+      opciones:[
+        {v:'U', t:'U = Utilizada'}, {v:'FB', t:'FB = Formato en Blanco'},
+        {v:'D', t:'D = Dañada'}, {v:'C', t:'C = Cancelada'}, {v:'E', t:'E = Extraviada'}
+      ]},
+    { id:'cupo_elabora', label:'Cupo de quien elabora', col:'D', tipo:'text' },
+    { id:'fecha_elaboracion', label:'Fecha de Elaboración', col:'E', tipo:'date' }
+  ],
+  solicitante: [
+    { id:'id_familia', label:'ID Familia Solicitante', col:'F', tipo:'text' },
+    { id:'nombre_sol', label:'Nombre Solicitante', col:'G', tipo:'text' },
+    { id:'apellido1_sol', label:'Primer Apellido Solicitante', col:'H', tipo:'text' },
+    { id:'apellido2_sol', label:'Segundo Apellido Solicitante', col:'I', tipo:'text' },
+    { id:'curp_sol', label:'CURP (18 dígitos) Solicitante', col:'J', tipo:'text', maxlength:18 },
+    { id:'telefono_sol', label:'Núm. de Teléfono (10 dígitos) Solicitante', col:'K', tipo:'text', maxlength:10 },
+    { id:'correo_sol', label:'Correo Electrónico Solicitante', col:'L', tipo:'email' }
+  ],
+  folioUnico: { col:'B' }, // Se usa solo para RDC y RDT
+  tramites: {
+    CUT: {
+      nombre: 'CUT (Cambio de Ubicación de Tarjeta)',
+      colSeleccion: 'M',
+      valorSeleccion: 'CUT (CAMBIO DE UBICACION DE TARJETA)',
+      usaFolioUnico:false,
+      campos:[
+        { id:'cut_clave_estado', label:'Clave del Estado', col:'N', tipo:'text' },
+        { id:'cut_nombre_estado', label:'Nombre del Estado', col:'O', tipo:'text' },
+        { id:'cut_sare_procedencia', label:'SARE de Procedencia', col:'P', tipo:'select',
+          opciones:['1301','1302','1303','1304','1305','1306','1307'].map(v=>({v,t:v})) },
+        { id:'cut_cct', label:'C.C.T. (10 dígitos)', col:'Q', tipo:'text', maxlength:10 },
+        { id:'cut_nombre_escuela', label:'Nombre de la Escuela', col:'R', tipo:'text' },
+        { id:'cut_programa', label:'Programa', col:'S', tipo:'select',
+          opciones:[{v:'RC',t:'RC'},{v:'BUEMS',t:'BUEMS'},{v:'JEF',t:'JEF'}] }
+      ]
+    },
+    RVP: {
+      nombre: 'RVP (Renuncia Voluntaria al Programa)',
+      colSeleccion: 'T',
+      valorSeleccion: 'RVP=Renuncia Voluntaria al Programa',
+      usaFolioUnico:false,
+      campos:[
+        { id:'rvp_motivo', label:'Motivo de la Renuncia', col:'U', tipo:'text' }
+      ]
+    },
+    RDC: {
+      nombre: 'RDC (Reimpresión o Duplicado de Contrato Bancario)',
+      colSeleccion: 'V',
+      valorSeleccion: 'RDC=Reimpresión o Duplicado de Contrato Bancario',
+      usaFolioUnico:true,
+      campos:[]
+    },
+    RDT: {
+      nombre: 'RDT (Reposición de Tarjeta - Robo o Extravío)',
+      colSeleccion: 'W',
+      valorSeleccion: 'RDT=Reposicion de Tarjeta (Robo o Extravío)',
+      usaFolioUnico:true,
+      campos:[
+        { id:'rdt_folio_banco', label:'Núm. de Folio del Reporte ante el Banco de Bienestar', col:'X', tipo:'text' }
+      ]
+    },
+    CDT: {
+      nombre: 'CDT (Cambio de Tutor)',
+      colSeleccion: 'Y',
+      valorSeleccion: 'CDT=Cambio de Tutor',
+      usaFolioUnico:false,
+      campos:[
+        { id:'cdt_causal', label:'Causal del Cambio de Tutor', col:'Z', tipo:'text' },
+        { id:'cdt_nombre', label:'Nombre', col:'AA', tipo:'text' },
+        { id:'cdt_apellido1', label:'Primer Apellido', col:'AB', tipo:'text' },
+        { id:'cdt_apellido2', label:'Segundo Apellido', col:'AC', tipo:'text' },
+        { id:'cdt_curp', label:'CURP (18 dígitos) Integrante-Baja', col:'AD', tipo:'text', maxlength:18 },
+        { id:'cdt_fecha_validacion', label:'Fecha de Validación', col:'AK', tipo:'date' },
+        { id:'cdt_folio_sibueb', label:'Folio SIBUEB o Formulario', col:'AL', tipo:'text' }
+      ]
+    },
+    BDI: {
+      nombre: 'BDI (Baja de Integrante/Registro)',
+      colSeleccion: 'AE',
+      valorSeleccion: 'BDI=Baja de Integrante/Registro',
+      usaFolioUnico:false,
+      campos:[
+        { id:'bdi_id_integrante', label:'ID Integrante (de quien se solicita la baja)', col:'AF', tipo:'text' },
+        { id:'bdi_nombre', label:'Nombre Integrante-Baja', col:'AG', tipo:'text' },
+        { id:'bdi_apellido1', label:'Primer Apellido Integrante-Baja', col:'AH', tipo:'text' },
+        { id:'bdi_apellido2', label:'Segundo Apellido Integrante-Baja', col:'AI', tipo:'text' },
+        { id:'bdi_curp', label:'CURP (18 dígitos) Integrante-Baja', col:'AJ', tipo:'text', maxlength:18 },
+        { id:'bdi_fecha_validacion', label:'Fecha de Validación', col:'AK', tipo:'date' },
+        { id:'bdi_folio_sibueb', label:'Folio SIBUEB', col:'AL', tipo:'text' }
+      ]
     }
-    if (datos.length === 0) {
-      mostrarMensaje('resultadoModulo1', 'El archivo no contiene datos a partir de la fila 2.', 'err');
+  }
+};
+
+/* =======================================================================================
+   MODULO: UTILIDADES (validaciones y helpers de formulario)
+======================================================================================= */
+const Utils = {
+  soloDigitos(input, maxLen){
+    input.addEventListener('input', () => {
+      input.value = input.value.replace(/\D/g,'').slice(0, maxLen);
+    });
+  },
+  crearCampoHTML(campo, idPrefix, valor){
+    const wrapperFull = campo.tipo === 'select' || campo.id.includes('nombre') ? '' : '';
+    const div = document.createElement('div');
+    div.className = 'campo';
+    const label = document.createElement('label');
+    label.textContent = campo.label;
+    div.appendChild(label);
+
+    let input;
+    if (campo.tipo === 'select') {
+      input = document.createElement('select');
+      const optVacia = document.createElement('option');
+      optVacia.value = ''; optVacia.textContent = '-- Selecciona --';
+      input.appendChild(optVacia);
+      campo.opciones.forEach(op => {
+        const o = document.createElement('option');
+        o.value = op.v; o.textContent = op.t;
+        input.appendChild(o);
+      });
+    } else {
+      input = document.createElement('input');
+      input.type = campo.tipo === 'date' ? 'date' : (campo.tipo === 'email' ? 'email' : 'text');
+      if (campo.maxlength) {
+        input.maxLength = campo.maxlength;
+        Utils.soloDigitos(input, campo.maxlength);
+      }
+    }
+    input.id = idPrefix + campo.id;
+    input.dataset.col = campo.col;
+    if (valor !== undefined && valor !== null) input.value = valor;
+    div.appendChild(input);
+    return div;
+  },
+  mostrarMensaje(elId, texto, tipo){
+    const el = document.getElementById(elId);
+    el.textContent = texto;
+    el.className = 'mensaje ' + tipo;
+    setTimeout(()=>{ el.className='mensaje'; }, 6000);
+  }
+};
+
+/* =======================================================================================
+   MODULO: DataService (comunicación con el backend Apps Script)
+======================================================================================= */
+const DataService = {
+  async getFoliosDisponibles(){
+    const res = await fetch(`${APPS_SCRIPT_URL}?action=folios`);
+    return res.json();
+  },
+  async buscarTramites(por, valor){
+    const url = `${APPS_SCRIPT_URL}?action=search&by=${encodeURIComponent(por)}&q=${encodeURIComponent(valor)}`;
+    const res = await fetch(url);
+    return res.json();
+  },
+  async crearTramite(data){
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method:'POST',
+      body: JSON.stringify({ action:'create', data })
+      // Sin header Content-Type a propósito: evita el preflight CORS con Apps Script.
+    });
+    return res.json();
+  },
+  async actualizarTramite(rowIndex, data){
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method:'POST',
+      body: JSON.stringify({ action:'update', rowIndex, data })
+    });
+    return res.json();
+  }
+};
+
+/* =======================================================================================
+   MODULO: TABS (cambio entre Módulo 1 y Módulo 2)
+======================================================================================= */
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('activo'));
+    document.querySelectorAll('.modulo').forEach(m=>m.classList.remove('activo'));
+    btn.classList.add('activo');
+    document.getElementById(btn.dataset.modulo).classList.add('activo');
+  });
+});
+
+/* =======================================================================================
+   MODULO: CAPTURA (Módulo 1)
+======================================================================================= */
+const Captura = {
+  init(){
+    const bloqueComun = document.getElementById('bloque-comun');
+    CONFIG.comunes.forEach(c => bloqueComun.appendChild(Utils.crearCampoHTML(c, 'cap_')));
+
+    const bloqueSolicitante = document.getElementById('bloque-solicitante');
+    CONFIG.solicitante.forEach(c => bloqueSolicitante.appendChild(Utils.crearCampoHTML(c, 'cap_')));
+
+    document.getElementById('select-tramite').addEventListener('change', (e)=>{
+      Captura.renderTramite(e.target.value);
+    });
+    document.getElementById('btn-guardar-captura').addEventListener('click', Captura.guardar);
+    document.getElementById('btn-limpiar-captura').addEventListener('click', ()=>location.reload());
+  },
+
+  async renderTramite(tipo){
+    const bloqueDinamico = document.getElementById('bloque-dinamico');
+    const bloqueFolio = document.getElementById('bloque-folio-unico');
+    bloqueDinamico.innerHTML = '';
+    bloqueFolio.classList.add('oculto');
+
+    if (!tipo) return;
+    const def = CONFIG.tramites[tipo];
+
+    if (def.usaFolioUnico) {
+      bloqueFolio.classList.remove('oculto');
+      await Captura.cargarFoliosDisponibles();
+    }
+
+    const card = document.createElement('div');
+    card.className = 'card';
+    const h2 = document.createElement('h2');
+    h2.textContent = def.nombre;
+    card.appendChild(h2);
+    const grid = document.createElement('div');
+    grid.className = 'grid';
+    def.campos.forEach(c => grid.appendChild(Utils.crearCampoHTML(c, 'cap_')));
+    card.appendChild(grid);
+    bloqueDinamico.appendChild(card);
+  },
+
+  async cargarFoliosDisponibles(){
+    const select = document.getElementById('select-folio-unico');
+    select.innerHTML = '<option value="">Cargando...</option>';
+    try {
+      const folios = await DataService.getFoliosDisponibles();
+      select.innerHTML = '<option value="">-- Selecciona un folio --</option>';
+      (folios || []).forEach(f=>{
+        const op = document.createElement('option');
+        op.value = f; op.textContent = f;
+        select.appendChild(op);
+      });
+    } catch(err){
+      select.innerHTML = '<option value="">Error al cargar folios</option>';
+    }
+  },
+
+  recolectarDatos(){
+    const data = {};
+    // Campos comunes + solicitante
+    document.querySelectorAll('#bloque-comun [data-col], #bloque-solicitante [data-col]').forEach(el=>{
+      data[el.dataset.col] = el.value;
+    });
+
+    const tipo = document.getElementById('select-tramite').value;
+    if (!tipo) return { error: 'Selecciona un tipo de trámite.' };
+    const def = CONFIG.tramites[tipo];
+
+    // Columna de selección del tramite
+    data[def.colSeleccion] = def.valorSeleccion;
+
+    // Folio único (si aplica)
+    if (def.usaFolioUnico) {
+      const folio = document.getElementById('select-folio-unico').value;
+      if (!folio) return { error: 'Selecciona el Folio Único.' };
+      data[CONFIG.folioUnico.col] = folio;
+    }
+
+    // Campos dinámicos del tramite
+    document.querySelectorAll('#bloque-dinamico [data-col]').forEach(el=>{
+      data[el.dataset.col] = el.value;
+    });
+
+    return { data, tipo };
+  },
+
+  async guardar(){
+    const resultado = Captura.recolectarDatos();
+    if (resultado.error) {
+      Utils.mostrarMensaje('msg-captura', resultado.error, 'error');
       return;
     }
-    mostrarMensaje('resultadoModulo1', 'Actualizando ' + datos.length + ' registros en BASE, esto puede tardar unos segundos...', 'ok');
-
-    llamarApi('procesarActualizacionModulo1', [datos])
-      .then(function (res) {
-        let html = 'Procesados: ' + res.procesados + ' · Actualizados: ' + res.actualizados;
-        if (res.noEncontrados.length > 0) {
-          html += ' · No encontrados: ' + res.noEncontrados.length +
-                  '<br><small>' + res.noEncontrados.slice(0, 30).join(', ') + (res.noEncontrados.length > 30 ? '...' : '') + '</small>';
-        }
-        mostrarMensaje('resultadoModulo1', html, 'ok');
-      })
-      .catch(function (err) {
-        mostrarMensaje('resultadoModulo1', 'Error: ' + err.message, 'err');
-      });
-  });
-}
-
-/* ==================================================================================
-   MÓDULO 2 — REGISTRO DE TARJETAS
-   -----------------------------------------------------------------------------
-   Los registros capturados en el formulario se van guardando en el arreglo
-   registrosModulo2 (en memoria del navegador) y se muestran en una tabla de
-   confirmación. Esto evita el problema anterior de apilar formularios
-   completos: ahora cada "Agregar" limpia el formulario y muestra lo capturado
-   en la tabla, dejando claro qué se va a enviar.
-   ================================================================================== */
-let registrosModulo2 = [];
-
-function cambiarModoModulo2() {
-  const modo = document.getElementById('selectorModo2').value;
-  document.getElementById('modo2Formulario').classList.toggle('oculto', modo !== 'formulario');
-  document.getElementById('modo2Excel').classList.toggle('oculto', modo !== 'excel');
-}
-
-function agregarRegistroModulo2() {
-  const obs = val('m2_obsLibre').trim() !== '' ? val('m2_obsLibre') : val('m2_obs');
-  const registro = {
-    folio: val('m2_folio'), idSare: val('m2_idSare'), nombreSare: val('m2_nombreSare'),
-    municipio: val('m2_municipio'), cct: val('m2_cct'), escuela: val('m2_escuela'),
-    idBecario: val('m2_idBecario'), nombreBecario: val('m2_nombreBecario'),
-    apellido1: val('m2_apellido1'), apellido2: val('m2_apellido2'), remesa: val('m2_remesa'),
-    programa: val('m2_programa'), bloque: val('m2_bloque'), obs: obs,
-    mesRemesa: val('m2_mesRemesa'), curp: val('m2_curp'), estatus: val('m2_estatus')
-  };
-
-  if (registro.folio.trim() === '') {
-    mostrarMensaje('resultadoModulo2', 'El folio es obligatorio para agregar el registro.', 'err');
-    return;
-  }
-
-  registrosModulo2.push(registro);
-  renderizarTablaModulo2();
-  limpiarFormularioModulo2();
-  document.getElementById('resultadoModulo2').innerHTML = '';
-}
-
-function limpiarFormularioModulo2() {
-  ['m2_folio','m2_idSare','m2_nombreSare','m2_municipio','m2_cct','m2_escuela','m2_idBecario',
-   'm2_nombreBecario','m2_apellido1','m2_apellido2','m2_remesa','m2_bloque','m2_obsLibre',
-   'm2_mesRemesa','m2_curp'].forEach(function (id) { document.getElementById(id).value = ''; });
-  ['m2_programa','m2_obs','m2_estatus'].forEach(function (id) { document.getElementById(id).value = ''; });
-  document.getElementById('m2_folio').focus();
-}
-
-function renderizarTablaModulo2() {
-  document.getElementById('contadorRegistrosM2').innerText = registrosModulo2.length;
-  const cont = document.getElementById('tablaRegistrosModulo2');
-  if (registrosModulo2.length === 0) {
-    cont.innerHTML = '<p style="font-size:12px;color:#667;">Aún no has agregado ningún registro.</p>';
-    return;
-  }
-  let html = '<table><tr><th>#</th><th>Folio</th><th>Nombre becario/tutor</th><th>Programa</th><th>Estatus</th><th></th></tr>';
-  registrosModulo2.forEach(function (r, i) {
-    html += '<tr><td>' + (i + 1) + '</td><td>' + r.folio + '</td><td>' + r.nombreBecario + ' ' + r.apellido1 + ' ' + r.apellido2 +
-            '</td><td>' + r.programa + '</td><td>' + r.estatus + '</td>' +
-            '<td><button class="btn-peligro" onclick="quitarRegistroModulo2(' + i + ')">Quitar</button></td></tr>';
-  });
-  html += '</table>';
-  cont.innerHTML = html;
-}
-
-function quitarRegistroModulo2(indice) {
-  registrosModulo2.splice(indice, 1);
-  renderizarTablaModulo2();
-}
-
-function enviarBloqueModulo2() {
-  if (registrosModulo2.length === 0) { mostrarMensaje('resultadoModulo2', 'Agrega al menos un registro antes de enviar.', 'err'); return; }
-  mostrarMensaje('resultadoModulo2', 'Enviando bloque a BASE...', 'ok');
-
-  llamarApi('registrarBloqueModulo2', [registrosModulo2])
-    .then(function (res) {
-      mostrarMensaje('resultadoModulo2', 'Bloque insertado: ' + res.insertados + ' registro(s) a partir de la fila ' + res.filaInicio + '.', 'ok');
-      registrosModulo2 = [];
-      renderizarTablaModulo2();
-    })
-    .catch(function (err) { mostrarMensaje('resultadoModulo2', 'Error: ' + err.message, 'err'); });
-}
-
-function procesarExcelModulo2() {
-  const input = document.getElementById('archivoModulo2');
-  leerExcel(input, function (filas) {
-    const registros = [];
-    for (let i = 1; i < filas.length; i++) {
-      const r = filas[i];
-      if (!r || r.every(function (v) { return v === ''; })) continue;
-      registros.push({
-        folio: r[0], idSare: r[1], nombreSare: r[2], municipio: r[3], cct: r[4], escuela: r[5],
-        idBecario: r[6], nombreBecario: r[7], apellido1: r[8], apellido2: r[9], remesa: r[10],
-        programa: r[11], bloque: r[12], obs: r[13], mesRemesa: r[14], curp: r[15], estatus: r[16]
-      });
+    try {
+      const respuesta = await DataService.crearTramite(resultado.data);
+      if (respuesta.error) throw new Error(respuesta.error);
+      Utils.mostrarMensaje('msg-captura', 'Trámite guardado correctamente (fila ' + respuesta.rowIndex + ').', 'ok');
+    } catch(err){
+      Utils.mostrarMensaje('msg-captura', 'Error al guardar: ' + err.message, 'error');
     }
-    if (registros.length === 0) { mostrarMensaje('resultadoModulo2', 'El archivo no tiene datos.', 'err'); return; }
-    mostrarMensaje('resultadoModulo2', 'Enviando ' + registros.length + ' registros a BASE...', 'ok');
-
-    llamarApi('registrarBloqueModulo2', [registros])
-      .then(function (res) {
-        mostrarMensaje('resultadoModulo2', 'Bloque insertado: ' + res.insertados + ' registro(s) a partir de la fila ' + res.filaInicio + '.', 'ok');
-      })
-      .catch(function (err) { mostrarMensaje('resultadoModulo2', 'Error: ' + err.message, 'err'); });
-  });
-}
-
-/* ==================================================================================
-   MÓDULO 3 — TRÁMITES
-   ================================================================================== */
-function cargarFoliosDisponibles() {
-  llamarApi('obtenerFoliosDisponibles', [])
-    .then(function (folios) {
-      const sel = document.getElementById('t3_folioUnico');
-      sel.innerHTML = '<option value="">Selecciona...</option>';
-      folios.forEach(function (f) { sel.innerHTML += '<option>' + f + '</option>'; });
-    })
-    .catch(function (err) { console.error(err); });
-}
-
-function cambiarTipoTramite() {
-  const tipo = document.getElementById('t3_tipo').value;
-  ['CUT', 'RVP', 'RDC', 'RDT', 'CDT', 'BDI'].forEach(function (t) {
-    document.getElementById('campos' + t).classList.toggle('oculto', t !== tipo);
-  });
-  document.getElementById('bloqueFolioUnico').classList.toggle('oculto', tipo !== 'RDC' && tipo !== 'RDT');
-}
-
-function leerComunesModulo3(prefijo) {
-  prefijo = prefijo || 't3_';
-  return {
-    estatusFicha: val(prefijo + 'estatusFicha'),
-    sare: val(prefijo + 'sare'),
-    cupoElabora: val(prefijo + 'cupoElabora'),
-    fechaElaboracion: val(prefijo + 'fechaElaboracion'),
-    idFamiliaSol: val(prefijo + 'idFamiliaSol'),
-    nombreSol: val(prefijo + 'nombreSol'),
-    apellido1Sol: val(prefijo + 'apellido1Sol'),
-    apellido2Sol: val(prefijo + 'apellido2Sol'),
-    curpSol: val(prefijo + 'curpSol'),
-    telSol: val(prefijo + 'telSol'),
-    correoSol: val(prefijo + 'correoSol'),
-    folioUnico: val(prefijo + 'folioUnico')
-  };
-}
-
-function val(id) {
-  const el = document.getElementById(id);
-  return el ? el.value : '';
-}
-
-function leerEspecificoPorTipo(tipo, sufijo) {
-  sufijo = sufijo || '';
-  switch (tipo) {
-    case 'CUT':
-      return {
-        claveEstado: val('cut_claveEstado' + sufijo), nombreEstado: val('cut_nombreEstado' + sufijo),
-        sareProcedencia: val('cut_sareProcedencia' + sufijo), cct: val('cut_cct' + sufijo),
-        escuela: val('cut_escuela' + sufijo), programa: val('cut_programa' + sufijo)
-      };
-    case 'RVP':
-      return { motivo: val('rvp_motivo' + sufijo) };
-    case 'RDC':
-      return {};
-    case 'RDT':
-      return { folioBanco: val('rdt_folioBanco' + sufijo) };
-    case 'CDT':
-      return {
-        causal: val('cdt_causal' + sufijo), nombre: val('cdt_nombre' + sufijo),
-        apellido1: val('cdt_apellido1' + sufijo), apellido2: val('cdt_apellido2' + sufijo),
-        curp: val('cdt_curp' + sufijo), fechaValidacion: val('cdt_fechaValidacion' + sufijo),
-        folioSibueb: val('cdt_folioSibueb' + sufijo)
-      };
-    case 'BDI':
-      return {
-        idIntegrante: val('bdi_idIntegrante' + sufijo), nombre: val('bdi_nombre' + sufijo),
-        apellido1: val('bdi_apellido1' + sufijo), apellido2: val('bdi_apellido2' + sufijo),
-        curp: val('bdi_curp' + sufijo), fechaValidacion: val('bdi_fechaValidacion' + sufijo),
-        folioSibueb: val('bdi_folioSibueb' + sufijo)
-      };
-    default:
-      return {};
   }
-}
+};
 
-function guardarTramite() {
-  const tipo = document.getElementById('t3_tipo').value;
-  if (!tipo) { mostrarMensaje('resultadoModulo3', 'Selecciona un tipo de trámite.', 'err'); return; }
+/* =======================================================================================
+   MODULO: EDICION (Módulo 2)
+======================================================================================= */
+const Edicion = {
+  rowIndexActual: null,
+  tipoActual: null,
 
-  const comunes = leerComunesModulo3('t3_');
-  const especifico = leerEspecificoPorTipo(tipo, '');
+  init(){
+    document.getElementById('btn-buscar').addEventListener('click', Edicion.buscar);
+    document.getElementById('btn-guardar-edicion').addEventListener('click', Edicion.actualizar);
+  },
 
-  mostrarMensaje('resultadoModulo3', 'Guardando trámite...', 'ok');
-  llamarApi('registrarTramite', [tipo, comunes, especifico])
-    .then(function (res) {
-      mostrarMensaje('resultadoModulo3', 'Trámite ' + res.tipo + ' guardado en la fila ' + res.fila + '.', 'ok');
-      cargarFoliosDisponibles(); // refresca folios (uno pudo marcarse como usado)
-    })
-    .catch(function (err) { mostrarMensaje('resultadoModulo3', 'Error: ' + err.message, 'err'); });
-}
+  async buscar(){
+    const por = document.getElementById('select-buscar-por').value;
+    const valor = document.getElementById('input-buscar-valor').value.trim();
+    if (!valor) {
+      Utils.mostrarMensaje('msg-edicion', 'Escribe un valor para buscar.', 'error');
+      return;
+    }
+    document.getElementById('card-resultados').classList.add('oculto');
+    document.getElementById('form-edicion-wrapper').classList.add('oculto');
 
-/* ==================================================================================
-   MÓDULO 4 — BÚSQUEDA / EDICIÓN
-   ================================================================================== */
-function buscarTramiteModulo4() {
-  const criterio = document.getElementById('t4_criterio').value;
-  const valor = document.getElementById('t4_valorBusqueda').value.trim();
-  if (!valor) { mostrarMensaje('resultadosBusqueda4', 'Ingresa un valor de búsqueda.', 'err'); return; }
-
-  mostrarMensaje('resultadosBusqueda4', 'Buscando...', 'ok');
-  llamarApi('buscarTramite', [criterio, valor])
-    .then(function (resultados) {
-      if (resultados.length === 0) {
-        mostrarMensaje('resultadosBusqueda4', 'No se encontraron trámites.', 'err');
-        document.getElementById('formularioEdicion4').classList.add('oculto');
+    try {
+      const resultados = await DataService.buscarTramites(por, valor);
+      if (resultados.error) throw new Error(resultados.error);
+      if (!resultados.length) {
+        Utils.mostrarMensaje('msg-edicion', 'No se encontraron registros.', 'error');
         return;
       }
-      let html = '<table><tr><th>Fila</th><th>Tipo</th><th>Folio</th><th>CURP solicitante</th><th></th></tr>';
-      resultados.forEach(function (r, idx) {
-        html += '<tr><td>' + r.numeroFila + '</td><td>' + r.tipo + '</td><td>' + (r.datos.FOLIO_UNICO || '') +
-                '</td><td>' + (r.datos.CURP_SOL || '') + '</td>' +
-                '<td><button class="btn-secundario" onclick="cargarEdicion(' + idx + ')">Editar</button></td></tr>';
-      });
-      html += '</table>';
-      document.getElementById('resultadosBusqueda4').innerHTML = html;
-      window._resultadosBusqueda4 = resultados; // se guarda temporalmente para el botón Editar
-    })
-    .catch(function (err) { mostrarMensaje('resultadosBusqueda4', 'Error: ' + err.message, 'err'); });
-}
+      Edicion.mostrarResultados(resultados);
+    } catch(err){
+      Utils.mostrarMensaje('msg-edicion', 'Error al buscar: ' + err.message, 'error');
+    }
+  },
 
-function cargarEdicion(indice) {
-  const registro = window._resultadosBusqueda4[indice];
-  const cont = document.getElementById('formularioEdicion4');
-  cont.classList.remove('oculto');
-  const d = registro.datos;
-  const tipo = registro.tipo;
+  mostrarResultados(resultados){
+    const cont = document.getElementById('lista-resultados');
+    cont.innerHTML = '';
+    resultados.forEach(r=>{
+      const div = document.createElement('div');
+      div.className = 'resultado-item';
+      const nombre = r.valores['G'] + ' ' + r.valores['H'] + ' ' + r.valores['I'];
+      div.innerHTML = `<span>Fila ${r.rowIndex} — ${nombre} — CURP: ${r.valores['J']}</span><span class="tag">${r.tipo || 'N/D'}</span>`;
+      div.addEventListener('click', ()=> Edicion.cargarFormulario(r));
+      cont.appendChild(div);
+    });
+    document.getElementById('card-resultados').classList.remove('oculto');
+  },
 
-  // Se reutiliza la misma estructura visual del módulo 3, con prefijo "e_"
-  cont.innerHTML =
-    '<h3>Editando trámite fila ' + registro.numeroFila + ' (' + tipo + ')</h3>' +
-    '<div class="fila-grid">' +
-      '<div><label>Estatus de ficha</label><select id="e_estatusFicha">' +
-        ['', 'U', 'FB', 'D', 'C', 'E'].map(function (o) {
-          return '<option value="' + o + '"' + (o === d.ESTATUS_FICHA ? ' selected' : '') + '>' + (o || 'Selecciona...') + '</option>';
-        }).join('') + '</select></div>' +
-      '<div><label>SARE</label><input type="text" id="e_sare" value="' + (d.SARE || '') + '"></div>' +
-      '<div><label>Cupo de quien elabora</label><input type="text" id="e_cupoElabora" value="' + (d.CUPO_ELABORA || '') + '"></div>' +
-      '<div><label>Fecha de elaboración</label><input type="date" id="e_fechaElaboracion" value="' + (d.FECHA_ELABORACION || '') + '"></div>' +
-      '<div><label>ID Familia solicitante</label><input type="text" id="e_idFamiliaSol" value="' + (d.ID_FAMILIA_SOL || '') + '"></div>' +
-      '<div><label>Nombre solicitante</label><input type="text" id="e_nombreSol" value="' + (d.NOMBRE_SOL || '') + '"></div>' +
-      '<div><label>Primer apellido solicitante</label><input type="text" id="e_apellido1Sol" value="' + (d.APELLIDO1_SOL || '') + '"></div>' +
-      '<div><label>Segundo apellido solicitante</label><input type="text" id="e_apellido2Sol" value="' + (d.APELLIDO2_SOL || '') + '"></div>' +
-      '<div><label>CURP solicitante</label><input type="text" id="e_curpSol" maxlength="18" value="' + (d.CURP_SOL || '') + '"></div>' +
-      '<div><label>Teléfono solicitante</label><input type="text" id="e_telSol" maxlength="10" value="' + (d.TEL_SOL || '') + '"></div>' +
-      '<div><label>Correo solicitante</label><input type="email" id="e_correoSol" value="' + (d.CORREO_SOL || '') + '"></div>' +
-    '</div>' +
-    campoEspecificoEditar(tipo, d) +
-    '<div class="acciones-final"><button class="btn-primario" onclick="guardarEdicion(' + registro.numeroFila + ',\'' + tipo + '\')">Guardar cambios</button></div>' +
-    '<div id="resultadoEdicion4"></div>';
-}
+  cargarFormulario(registro){
+    Edicion.rowIndexActual = registro.rowIndex;
+    Edicion.tipoActual = registro.tipo;
+    const valores = registro.valores;
 
-function campoEspecificoEditar(tipo, d) {
-  switch (tipo) {
-    case 'CUT':
-      return '<h3>Datos CUT</h3><div class="fila-grid">' +
-        '<div><label>Clave del estado</label><input type="text" id="cut_claveEstado" value="' + (d.CUT_CLAVE_ESTADO || '') + '"></div>' +
-        '<div><label>Nombre del estado</label><input type="text" id="cut_nombreEstado" value="' + (d.CUT_NOMBRE_ESTADO || '') + '"></div>' +
-        '<div><label>SARE de procedencia</label><input type="text" id="cut_sareProcedencia" value="' + (d.CUT_SARE_PROC || '') + '"></div>' +
-        '<div><label>C.C.T.</label><input type="text" id="cut_cct" maxlength="10" value="' + (d.CUT_CCT || '') + '"></div>' +
-        '<div><label>Nombre de la escuela</label><input type="text" id="cut_escuela" value="' + (d.CUT_ESCUELA || '') + '"></div>' +
-        '<div><label>Programa</label><input type="text" id="cut_programa" value="' + (d.CUT_PROGRAMA || '') + '"></div></div>';
-    case 'RVP':
-      return '<h3>Datos RVP</h3><label>Motivo</label><textarea id="rvp_motivo" rows="3">' + (d.RVP_MOTIVO || '') + '</textarea>';
-    case 'RDC':
-      return '<h3>Datos RDC</h3><p style="font-size:12px;color:#667;">Folio único: ' + (d.FOLIO_UNICO || '') + '</p>';
-    case 'RDT':
-      return '<h3>Datos RDT</h3><label>Folio del reporte al banco</label><input type="text" id="rdt_folioBanco" value="' + (d.RDT_FOLIO_BANCO || '') + '">';
-    case 'CDT':
-      return '<h3>Datos CDT</h3><div class="fila-grid">' +
-        '<div><label>Causal</label><input type="text" id="cdt_causal" value="' + (d.CDT_CAUSAL || '') + '"></div>' +
-        '<div><label>Nombre</label><input type="text" id="cdt_nombre" value="' + (d.CDT_NOMBRE || '') + '"></div>' +
-        '<div><label>Primer apellido</label><input type="text" id="cdt_apellido1" value="' + (d.CDT_APELLIDO1 || '') + '"></div>' +
-        '<div><label>Segundo apellido</label><input type="text" id="cdt_apellido2" value="' + (d.CDT_APELLIDO2 || '') + '"></div>' +
-        '<div><label>CURP</label><input type="text" id="cdt_curp" maxlength="18" value="' + (d.CDT_CURP || '') + '"></div>' +
-        '<div><label>Fecha de validación</label><input type="date" id="cdt_fechaValidacion" value="' + (d.FECHA_VALIDACION || '') + '"></div>' +
-        '<div><label>Folio SIBUEB</label><input type="text" id="cdt_folioSibueb" value="' + (d.FOLIO_SIBUEB || '') + '"></div></div>';
-    case 'BDI':
-      return '<h3>Datos BDI</h3><div class="fila-grid">' +
-        '<div><label>ID integrante</label><input type="text" id="bdi_idIntegrante" value="' + (d.BDI_ID_INTEGRANTE || '') + '"></div>' +
-        '<div><label>Nombre</label><input type="text" id="bdi_nombre" value="' + (d.BDI_NOMBRE || '') + '"></div>' +
-        '<div><label>Primer apellido</label><input type="text" id="bdi_apellido1" value="' + (d.BDI_APELLIDO1 || '') + '"></div>' +
-        '<div><label>Segundo apellido</label><input type="text" id="bdi_apellido2" value="' + (d.BDI_APELLIDO2 || '') + '"></div>' +
-        '<div><label>CURP</label><input type="text" id="bdi_curp" maxlength="18" value="' + (d.BDI_CURP || '') + '"></div>' +
-        '<div><label>Fecha de validación</label><input type="date" id="bdi_fechaValidacion" value="' + (d.FECHA_VALIDACION || '') + '"></div>' +
-        '<div><label>Folio SIBUEB</label><input type="text" id="bdi_folioSibueb" value="' + (d.FOLIO_SIBUEB || '') + '"></div></div>';
-    default:
-      return '';
+    const bloqueComun = document.getElementById('bloque-comun-edit');
+    bloqueComun.innerHTML = '';
+    CONFIG.comunes.forEach(c => bloqueComun.appendChild(Utils.crearCampoHTML(c, 'edit_', valores[c.col])));
+
+    const bloqueSolicitante = document.getElementById('bloque-solicitante-edit');
+    bloqueSolicitante.innerHTML = '';
+    CONFIG.solicitante.forEach(c => bloqueSolicitante.appendChild(Utils.crearCampoHTML(c, 'edit_', valores[c.col])));
+
+    const bloqueFolio = document.getElementById('bloque-folio-unico-edit');
+    const def = registro.tipo ? CONFIG.tramites[registro.tipo] : null;
+    if (def && def.usaFolioUnico) {
+      bloqueFolio.classList.remove('oculto');
+      document.getElementById('input-folio-unico-edit').value = valores[CONFIG.folioUnico.col] || '';
+    } else {
+      bloqueFolio.classList.add('oculto');
+    }
+
+    const bloqueDinamico = document.getElementById('bloque-dinamico-edit');
+    bloqueDinamico.innerHTML = '';
+    if (def) {
+      const card = document.createElement('div');
+      card.className = 'card';
+      const h2 = document.createElement('h2');
+      h2.textContent = def.nombre + ' (registrado)';
+      card.appendChild(h2);
+      const grid = document.createElement('div');
+      grid.className = 'grid';
+      def.campos.forEach(c => grid.appendChild(Utils.crearCampoHTML(c, 'edit_', valores[c.col])));
+      card.appendChild(grid);
+      bloqueDinamico.appendChild(card);
+    }
+
+    document.getElementById('form-edicion-wrapper').classList.remove('oculto');
+  },
+
+  async actualizar(){
+    if (!Edicion.rowIndexActual) return;
+    const data = {};
+    document.querySelectorAll('#bloque-comun-edit [data-col], #bloque-solicitante-edit [data-col], #bloque-dinamico-edit [data-col]')
+      .forEach(el=>{ data[el.dataset.col] = el.value; });
+
+    try {
+      const resp = await DataService.actualizarTramite(Edicion.rowIndexActual, data);
+      if (resp.error) throw new Error(resp.error);
+      Utils.mostrarMensaje('msg-edicion', 'Trámite actualizado correctamente.', 'ok');
+    } catch(err){
+      Utils.mostrarMensaje('msg-edicion', 'Error al actualizar: ' + err.message, 'error');
+    }
   }
-}
+};
 
-function guardarEdicion(numeroFila, tipo) {
-  const comunes = {
-    estatusFicha: val('e_estatusFicha'), sare: val('e_sare'), cupoElabora: val('e_cupoElabora'),
-    fechaElaboracion: val('e_fechaElaboracion'), idFamiliaSol: val('e_idFamiliaSol'), nombreSol: val('e_nombreSol'),
-    apellido1Sol: val('e_apellido1Sol'), apellido2Sol: val('e_apellido2Sol'), curpSol: val('e_curpSol'),
-    telSol: val('e_telSol'), correoSol: val('e_correoSol')
-  };
-  const especifico = leerEspecificoPorTipo(tipo, '');
-
-  mostrarMensaje('resultadoEdicion4', 'Guardando cambios...', 'ok');
-  llamarApi('actualizarTramite', [numeroFila, tipo, comunes, especifico])
-    .then(function (res) {
-      mostrarMensaje('resultadoEdicion4', 'Trámite actualizado en la fila ' + res.fila + '.', 'ok');
-    })
-    .catch(function (err) { mostrarMensaje('resultadoEdicion4', 'Error: ' + err.message, 'err'); });
-}
+/* =======================================================================================
+   MODULO: INICIALIZACION GENERAL
+======================================================================================= */
+Captura.init();
+Edicion.init();
 </script>
 </body>
 </html>
