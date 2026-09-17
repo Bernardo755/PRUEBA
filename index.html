@@ -303,6 +303,14 @@ const Utils = {
       input.value = input.value.replace(/\D/g,'').slice(0, maxLen);
     });
   },
+
+  // Permite letras y números, eliminando símbolos y convirtiendo a mayúsculas
+  soloAlfanumerico(input, maxLen){
+    input.addEventListener('input', () => {
+      input.value = input.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, maxLen);
+    });
+  },
+
   crearCampoHTML(campo, idPrefix, valor){
     const wrapperFull = campo.tipo === 'select' || campo.id.includes('nombre') ? '' : '';
     const div = document.createElement('div');
@@ -325,7 +333,8 @@ const Utils = {
     } else {
       input = document.createElement('input');
       input.type = campo.tipo === 'date' ? 'date' : (campo.tipo === 'email' ? 'email' : 'text');
-     if (campo.maxlength) {
+      
+      if (campo.maxlength) {
         input.maxLength = campo.maxlength;
         
         // Aplica alfanumérico si es CURP, o solo dígitos si es teléfono/numérico
@@ -342,6 +351,7 @@ const Utils = {
     div.appendChild(input);
     return div;
   },
+
   mostrarMensaje(elId, texto, tipo){
     const el = document.getElementById(elId);
     el.textContent = texto;
@@ -349,7 +359,6 @@ const Utils = {
     setTimeout(()=>{ el.className='mensaje'; }, 6000);
   }
 };
-
 /* =======================================================================================
    MODULO: DataService (comunicación con el backend Apps Script)
 ======================================================================================= */
