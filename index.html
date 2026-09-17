@@ -250,14 +250,14 @@ const CONFIG = {
       nombre: 'RDC (Reimpresión o Duplicado de Contrato Bancario)',
       colSeleccion: 'V',
       valorSeleccion: 'RDC=Reimpresión o Duplicado de Contrato Bancario',
-      usaFolioUnico:true,
+      usaFolioUnico:false,
       campos:[]
     },
     RDT: {
       nombre: 'RDT (Reposición de Tarjeta - Robo o Extravío)',
       colSeleccion: 'W',
       valorSeleccion: 'RDT=Reposicion de Tarjeta (Robo o Extravío)',
-      usaFolioUnico:true,
+      usaFolioUnico:false,
       campos:[
         { id:'rdt_folio_banco', label:'Núm. de Folio del Reporte ante el Banco de Bienestar', col:'X', tipo:'text' }
       ]
@@ -266,7 +266,7 @@ const CONFIG = {
       nombre: 'CDT (Cambio de Tutor)',
       colSeleccion: 'Y',
       valorSeleccion: 'CDT=Cambio de Tutor',
-      usaFolioUnico:false,
+      usaFolioUnico:true,
       campos:[
         { id:'cdt_causal', label:'Causal del Cambio de Tutor', col:'Z', tipo:'text' },
         { id:'cdt_nombre', label:'Nombre', col:'AA', tipo:'text' },
@@ -281,7 +281,7 @@ const CONFIG = {
       nombre: 'BDI (Baja de Integrante/Registro)',
       colSeleccion: 'AE',
       valorSeleccion: 'BDI=Baja de Integrante/Registro',
-      usaFolioUnico:false,
+      usaFolioUnico:true,
       campos:[
         { id:'bdi_id_integrante', label:'ID Integrante (de quien se solicita la baja)', col:'AF', tipo:'text' },
         { id:'bdi_nombre', label:'Nombre Integrante-Baja', col:'AG', tipo:'text' },
